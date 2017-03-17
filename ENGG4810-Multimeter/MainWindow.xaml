@@ -4,9 +4,43 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ENGG4810_Multimeter"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="600" Width="850">
+    <Window.Resources>
+        <Storyboard x:Key="ModeLoadStoryboard">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="grid">
+                <EasingDoubleKeyFrame KeyTime="0" Value="0.1"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.3" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+    </Window.Resources>
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+            <BeginStoryboard Storyboard="{StaticResource ModeLoadStoryboard}"/>
+        </EventTrigger>
+    </Window.Triggers>
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <!--<Grid Grid.RowSpan="2">
+            <Rectangle Fill="White" Stretch="Fill" />
+        </Grid>-->
+        <StackPanel Orientation="Horizontal">
+            <Button Content="Connected" FontSize="24" Click="Button_Click" />
+            <Button Content="Disconnected" FontSize="24" Click="Button_Click" />
+        </StackPanel>
+        <Grid x:Name="grid" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="2*" MaxWidth="350" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Current" />
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+            <TextBlock Grid.Column="2" Text="Multimeter" />
+        </Grid>
     </Grid>
 </Window>
