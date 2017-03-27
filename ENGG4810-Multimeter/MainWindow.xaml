@@ -7,7 +7,8 @@
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         mc:Ignorable="d"
         Title="MainWindow" Height="700" Width="1000"
-        DataContext="{Binding Main, Source={StaticResource Locator}}">
+        >
+    <!--DataContext="{Binding Main, Source={StaticResource Locator}}"-->
     <Window.Resources>
         <Storyboard x:Key="ModeLoadStoryboard">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="mainGrid">
@@ -30,7 +31,7 @@
                 </Trigger>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" TargetName="border" Value="Transparent"/>
-                    <Setter Property="BorderBrush" TargetName="border" Value="#2567d1"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="#9017a5"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
                     <Setter Property="Background" TargetName="border" Value="LightGray"/>
@@ -47,10 +48,49 @@
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
+        <ControlTemplate x:Key="AllButtonsTemplate" TargetType="{x:Type Button}">
+            <Border x:Name="border" BorderBrush="Transparent" BorderThickness="2" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsDefaulted" Value="True">
+                    <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <!--<Setter Property="Background" TargetName="border" Value="#FFBEE6FD"/>-->
+                    <Setter Property="BorderBrush" TargetName="border" Value="Gray"/>
+                    <Setter Property="BorderThickness" TargetName="border" Value="2"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" TargetName="border" Value="Gray"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="Gray"/>
+                </Trigger>
+                <Trigger Property="ToggleButton.IsChecked" Value="True">
+                    <Setter Property="Background" TargetName="border" Value="#FFBCDDEE"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FF245A83"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" TargetName="border" Value="#FFF4F4F4"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FFADB2B5"/>
+                    <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="#FF838383"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <!--<Storyboard Name="playSimulationStoryboard" x:Key="SimulatePlayStoryboard" AutoReverse="True" RepeatBehavior="Forever">
+            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="rectangle">
+                <EasingColorKeyFrame KeyTime="0:0:0.4" Value="#FF7284A4"/>
+                <EasingColorKeyFrame KeyTime="0:0:0.6" Value="#FF327858"/>
+                <EasingColorKeyFrame KeyTime="0:0:0.8" Value="#FF6C4C1E"/>
+                <EasingColorKeyFrame KeyTime="0:0:1" Value="#FF340804"/>
+                <EasingColorKeyFrame KeyTime="0:0:1.2" Value="#FF270434"/>
+                <EasingColorKeyFrame KeyTime="0:0:1.4" Value="#FF17253d"/>
+            </ColorAnimationUsingKeyFrames>
+        </Storyboard>-->
     </Window.Resources>
     <Window.Triggers>
         <EventTrigger RoutedEvent="FrameworkElement.Loaded">
             <BeginStoryboard Storyboard="{StaticResource ModeLoadStoryboard}"/>
+            <!--<BeginStoryboard Storyboard="{StaticResource SimulatePlayStoryboard}"/>-->
         </EventTrigger>
     </Window.Triggers>
     <Grid>
@@ -65,8 +105,8 @@
             <Button x:Name="btnConnected"
                     Content="Connected" 
                     FontSize="24" 
-                    Click="Button_Click" 
-                    BorderBrush="#2567d1"
+                    Click="btnConnected_Click" 
+                    BorderBrush="#9017a5"
                     FontWeight="Thin"
                     Template="{DynamicResource HeadingButtonTemplate}"
                     Margin="10,10,10,0"/>
@@ -77,9 +117,9 @@
                     FontWeight="Thin"
                     BorderBrush="Transparent"
                     Margin="10,10,10,0"
-                    Click="Button_Click" />
+                    Click="btnDisconnected_Click" />
         </StackPanel>
-        <Grid x:Name="mainGrid" Grid.Row="1" RenderTransformOrigin="0.5,0.5">
+        <Grid x:Name="mainGrid" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Background="#eeeaef">
             <Grid.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -91,10 +131,16 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*" />
                 <ColumnDefinition Width="5" />
-                <ColumnDefinition Width="2*" MaxWidth="350" />
+                <ColumnDefinition Name="columnMultimeter" Width="2*" MaxWidth="350" />
             </Grid.ColumnDefinitions>
-            <StackPanel Margin="10,0,0,0">
-                <TextBlock Text="Current" Margin="10,10,0,-20" FontSize="34" FontWeight="Light" />
+            <StackPanel Margin="10,0,5,10" Background="White">
+                <StackPanel.Effect>
+                    <DropShadowEffect BlurRadius="2" Direction="270" ShadowDepth="2.5" Color="#FFE3E6EA"/>
+                </StackPanel.Effect>
+                <StackPanel Orientation="Horizontal" Margin="10,10,0,-20">
+                    <TextBlock Name="txtBlockDataHeading" Text="Current: " FontSize="34" FontWeight="Light" Foreground="#17a398" />
+                    <TextBlock Text="{Binding Value}" FontSize="34" FontWeight="Light" Foreground="#17a398" />
+                </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="btnPlay" 
                             Content="&#xE768;" 
@@ -104,7 +150,10 @@
                             Foreground="#333435"
                             BorderThickness="0.5"
                             Margin="0,0,5,0"
-                            Padding="5"/>
+                            Padding="5"
+                            Click="btnPlay_Click"
+                            ToolTip="Start plotting data"
+                            Template="{DynamicResource AllButtonsTemplate}"/>
                     <Button x:Name="btnSave" 
                             Content="&#xE74E;" 
                             FontFamily="Segoe MDL2 Assets" 
@@ -113,9 +162,31 @@
                             Foreground="#333435"
                             BorderThickness="0.5"
                             Margin="0,0,10,0"
-                            Padding="5"/>
+                            Padding="5"
+                            ToolTip="Save the plot"
+                            Template="{DynamicResource AllButtonsTemplate}"/>
+                    <Button x:Name="btnOpenFile" 
+                            Content="&#xE8E5;" 
+                            FontFamily="Segoe MDL2 Assets" 
+                            FontSize="26" 
+                            BorderBrush="LightGray"
+                            Foreground="#333435"
+                            BorderThickness="0.5"
+                            Margin="0,0,10,0"
+                            Padding="5"
+                            Visibility="Collapsed"
+                            ToolTip="Open File"
+                            Template="{DynamicResource AllButtonsTemplate}"/>
                 </StackPanel>
-                <Rectangle Height="450" Fill="#17253d" Margin="10,0" />
+                <!--<Rectangle x:Name="rectangle" Height="450" Fill="#17253d" Margin="10,0" />-->
+                <lvc:CartesianChart Series="{Binding SeriesCollection}" LegendLocation="Bottom" MinHeight="450" Zoom="X" >
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="Value" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="Timestamp" Labels="{Binding Labels}"></lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                </lvc:CartesianChart>
                 <Button x:Name="btnDelete" 
                         Content="Delete" 
                         HorizontalAlignment="Right" 
@@ -123,10 +194,10 @@
                         FontSize="16" 
                         Padding="5"
                         MinWidth="70"
-                        BorderBrush="LightGray"/>
+                        BorderBrush="LightGray" Template="{DynamicResource AllButtonsTemplate}"/>
             </StackPanel>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="LightGray" />
-            <StackPanel Grid.Column="2" Margin="0" Background="#eeeaef">
+            <StackPanel Name="stackPanelMultimeter" Grid.Column="2" Margin="0" Background="#eeeaef">
                 <StackPanel Orientation="Horizontal" Background="LightGray">
                     <Button x:Name="btnMultimeterHide" 
                         Content="&#xE76C;" 
@@ -135,10 +206,12 @@
                         FontSize="24" 
                         BorderBrush="LightGray"
                         Foreground="#404035"
-                            Background="Gray"
+                        Background="#8a8d8c"
                         BorderThickness="0.5"
                         Margin="0"
-                        Padding="5"/>
+                        Padding="5"
+                        Click="btnMultimeterHide_Click"
+                        Template="{DynamicResource AllButtonsTemplate}"/>
                     <TextBlock Text="Multimeter Control"
                            FontSize="24"
                            Margin="5"
@@ -148,7 +221,26 @@
                     <StackPanel.Effect>
                         <DropShadowEffect Color="#FFE3E6EA" Direction="270" ShadowDepth="2.5"/>
                     </StackPanel.Effect>
-                    <TextBlock x:Name="txtBlockValue" Text="0.0" Padding="5" FontWeight="Light" Margin="10,5,10,5" Background="#708814" FontSize="50" TextAlignment="Right" />
+                    <StackPanel Orientation="Horizontal" Margin="10,5,10,5">
+                        <TextBlock x:Name="txtBlockValue"
+                                   Text="0.0" 
+                                   Padding="5" 
+                                   FontWeight="Light" 
+                                   Background="#708814" 
+                                   FontSize="50" 
+                                   TextAlignment="Right" 
+                                   HorizontalAlignment="Stretch" Width="275"/>
+                        <TextBlock x:Name="txtBlockMultiUnit"
+                                   Text="A" 
+                                   Padding="5,15,5,0" 
+                                   FontWeight="Light" 
+                                   Background="#708814" 
+                                   FontSize="40"
+                                   Foreground="#1E2121"
+                                   Margin="-5,0,0,0"
+                                   TextAlignment="Center"
+                                    Width="50"/>
+                    </StackPanel>
                     <Grid Background="White">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
@@ -158,14 +250,54 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Button x:Name="btnDummy1" Grid.Row="0" Grid.Column="0" Content="Dummy" Margin="10" FontSize="20" BorderBrush="LightGray"
-                            HorizontalAlignment="Stretch" Padding="15" VerticalAlignment="Center"/>
-                        <Button x:Name="btnDummy2" Grid.Row="1" Grid.Column="1" Content="Dummy" Margin="10" FontSize="20" BorderBrush="LightGray"
-                            HorizontalAlignment="Stretch" Padding="15" VerticalAlignment="Center"/>
-                        <Button x:Name="btnDummy3" Grid.Row="0" Grid.Column="1" Content="Dummy" Margin="10" FontSize="20" BorderBrush="LightGray"
-                            HorizontalAlignment="Stretch" Padding="15" VerticalAlignment="Center"/>
-                        <Button x:Name="btnDummy4" Grid.Row="1" Grid.Column="0" Content="Dummy" Margin="10" FontSize="20" BorderBrush="LightGray"
-                            HorizontalAlignment="Stretch" Padding="15" VerticalAlignment="Center"/>
+                        <Button x:Name="btnCurrent" 
+                                Grid.Row="0" 
+                                Grid.Column="0" 
+                                Content="Current" 
+                                Margin="10" 
+                                FontSize="20" 
+                                BorderBrush="LightGray"
+                                HorizontalAlignment="Stretch" 
+                                Padding="15" 
+                                VerticalAlignment="Center"
+                                Template="{DynamicResource AllButtonsTemplate}"
+                                Click="btnCurrent_Click"/>
+                        <Button x:Name="btnDummy2" 
+                                Grid.Row="1" 
+                                Grid.Column="1" 
+                                Content="Dummy" 
+                                Margin="10" 
+                                FontSize="20" 
+                                BorderBrush="LightGray"
+                                HorizontalAlignment="Stretch" 
+                                Padding="15" 
+                                VerticalAlignment="Center"
+                                IsEnabled="False"
+                                Template="{DynamicResource AllButtonsTemplate}"/>
+                        <Button x:Name="btnResistance" 
+                                Grid.Row="0" 
+                                Grid.Column="1" 
+                                Content="Resistance" 
+                                Margin="10" 
+                                FontSize="20" 
+                                BorderBrush="LightGray"
+                                HorizontalAlignment="Stretch" 
+                                Padding="15" 
+                                VerticalAlignment="Center"
+                                Template="{DynamicResource AllButtonsTemplate}"
+                                Click="btnResistance_Click"/>
+                        <Button x:Name="btnVoltage" 
+                                Grid.Row="1" 
+                                Grid.Column="0" 
+                                Content="Voltage" 
+                                Margin="10" 
+                                FontSize="20" 
+                                BorderBrush="LightGray"
+                                HorizontalAlignment="Stretch" 
+                                Padding="15" 
+                                VerticalAlignment="Center"
+                                Template="{DynamicResource AllButtonsTemplate}"
+                                Click="btnVoltage_Click"/>
                     </Grid>
                 </StackPanel>
             </StackPanel>
