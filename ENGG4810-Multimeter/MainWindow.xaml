@@ -7,8 +7,8 @@
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         mc:Ignorable="d"
         Title="MainWindow" Height="700" Width="1000"
+        DataContext="{Binding Main, Source={StaticResource Locator}}"
         >
-    <!--DataContext="{Binding Main, Source={StaticResource Locator}}"-->
     <Window.Resources>
         <Storyboard x:Key="ModeLoadStoryboard">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="mainGrid">
@@ -138,7 +138,7 @@
                     <DropShadowEffect BlurRadius="2" Direction="270" ShadowDepth="2.5" Color="#FFE3E6EA"/>
                 </StackPanel.Effect>
                 <StackPanel Orientation="Horizontal" Margin="10,10,0,-20">
-                    <TextBlock Name="txtBlockDataHeading" Text="Current: " FontSize="34" FontWeight="Light" Foreground="#17a398" />
+                    <TextBlock Name="txtBlockDataHeading" Text="{Binding DataType}" FontSize="34" FontWeight="Light" Foreground="#17a398" />
                     <TextBlock Text="{Binding Value}" FontSize="34" FontWeight="Light" Foreground="#17a398" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -164,6 +164,7 @@
                             Margin="0,0,10,0"
                             Padding="5"
                             ToolTip="Save the plot"
+                            Click="btnSave_Click"
                             Template="{DynamicResource AllButtonsTemplate}"/>
                     <Button x:Name="btnOpenFile" 
                             Content="&#xE8E5;" 
@@ -176,15 +177,20 @@
                             Padding="5"
                             Visibility="Collapsed"
                             ToolTip="Open File"
+                            Click="btnOpenFile_Click"
                             Template="{DynamicResource AllButtonsTemplate}"/>
                 </StackPanel>
                 <!--<Rectangle x:Name="rectangle" Height="450" Fill="#17253d" Margin="10,0" />-->
-                <lvc:CartesianChart Series="{Binding SeriesCollection}" LegendLocation="Bottom" MinHeight="450" Zoom="X" >
+                <lvc:CartesianChart Name="chart" Series="{Binding SeriesCollection}" LegendLocation="Bottom" MinHeight="450" Zoom="X" >
                     <lvc:CartesianChart.AxisY>
                         <lvc:Axis Title="Value" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
                     </lvc:CartesianChart.AxisY>
                     <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="Timestamp" Labels="{Binding Labels}"></lvc:Axis>
+                        <lvc:Axis Title="Timestamp" Labels="{Binding Labels}" MinValue="{Binding XAxisMin}">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator Step="1" />
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
                     </lvc:CartesianChart.AxisX>
                 </lvc:CartesianChart>
                 <Button x:Name="btnDelete" 
@@ -194,6 +200,7 @@
                         FontSize="16" 
                         Padding="5"
                         MinWidth="70"
+                        Click="btnDelete_Click"
                         BorderBrush="LightGray" Template="{DynamicResource AllButtonsTemplate}"/>
             </StackPanel>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="LightGray" />
@@ -226,17 +233,17 @@
                                    Text="0.0" 
                                    Padding="5" 
                                    FontWeight="Light" 
-                                   Background="#708814" 
+                                   Background="#708814"
                                    FontSize="50" 
                                    TextAlignment="Right" 
                                    HorizontalAlignment="Stretch" Width="275"/>
                         <TextBlock x:Name="txtBlockMultiUnit"
-                                   Text="A" 
+                                   Text="{Binding Unit}" 
                                    Padding="5,15,5,0" 
                                    FontWeight="Light" 
-                                   Background="#708814" 
+                                   Foreground="#CC000000"
+                                   Background="#FF708814"
                                    FontSize="40"
-                                   Foreground="#1E2121"
                                    Margin="-5,0,0,0"
                                    TextAlignment="Center"
                                     Width="50"/>

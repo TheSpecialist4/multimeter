@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ENGG4810-Multimeter", "ENGG4810-Multimeter\ENGG4810-Multimeter.csproj", "{8741CF2A-EC04-4B8F-9D23-02DD29199413}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup1", "Setup1\Setup1.vdproj", "{FF9FCFA4-5D18-4FB8-9447-5094A5BE6C1B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,8 @@ Global
 		{8741CF2A-EC04-4B8F-9D23-02DD29199413}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8741CF2A-EC04-4B8F-9D23-02DD29199413}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8741CF2A-EC04-4B8F-9D23-02DD29199413}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF9FCFA4-5D18-4FB8-9447-5094A5BE6C1B}.Debug|Any CPU.ActiveCfg = Debug
+		{FF9FCFA4-5D18-4FB8-9447-5094A5BE6C1B}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
