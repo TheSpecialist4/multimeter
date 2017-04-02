@@ -106,12 +106,7 @@ namespace ENGG4810_Multimeter
 
             if (vm.IsReading && vm.IsModeConnected)
             {
-                //this.Dispatcher.Invoke(() =>
-                //{
-                //    vm.StartGraphing();
-                //});
-                //Task.Factory.StartNew(vm.StartGraphing);
-                vm.StartGraphingConnected();
+                Task.Factory.StartNew(vm.StartContinuousGraph);
                 return;
             }
 

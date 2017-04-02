@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace ENGG4810_Multimeter.ViewModel
 {
@@ -102,6 +103,8 @@ namespace ENGG4810_Multimeter.ViewModel
             Unit = "A";
             DataType = "Current: ";
 
+            XAxisMin = 0;
+
             DataFileLocation = "";
 
             SeriesCollection = new SeriesCollection();
@@ -117,16 +120,29 @@ namespace ENGG4810_Multimeter.ViewModel
             });
         }
 
-        public void StartGraphingConnected()
+        //public void StartGraphingConnected()
+        //{
+        //    for (int i = 0; i < 15; i++)
+        //    {
+        //        var next = random.Next(0, 20);
+        //        SeriesCollection[0].Values.Add(next);
+        //        Value = next.ToString() + Unit;
+        //    }
+        //    XAxisMin = SeriesCollection[0].Values.Count - 14;
+        //}
+
+        public void StartContinuousGraph()
         {
-            for (int i = 0; i < 15; i++)
+            while (IsReading)
             {
                 var next = random.Next(0, 20);
-                Debug.Print($"added {next}\n");
-                SeriesCollection[0].Values.Add(next);
-                Value = next.ToString() + Unit;
+
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => {
+                    SeriesCollection[0].Values.Add(next);
+                    Value = next.ToString() + Unit;
+                }));
+                Thread.Sleep(500);
             }
-            XAxisMin = SeriesCollection[0].Values.Count - 14;
         }
 
         public void SwitchMode()
@@ -204,6 +220,7 @@ namespace ENGG4810_Multimeter.ViewModel
         public void DeleteGraphData()
         {
             SeriesCollection[0].Values.Clear();
+            Value = "";
         }
     }
 }

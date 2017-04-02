@@ -181,7 +181,7 @@
                             Template="{DynamicResource AllButtonsTemplate}"/>
                 </StackPanel>
                 <!--<Rectangle x:Name="rectangle" Height="450" Fill="#17253d" Margin="10,0" />-->
-                <lvc:CartesianChart Name="chart" Series="{Binding SeriesCollection}" LegendLocation="Bottom" MinHeight="450" Zoom="X" >
+                <lvc:CartesianChart Name="chart" Series="{Binding SeriesCollection}" AnimationsSpeed="0:0:0.5" LegendLocation="Bottom" MinHeight="450" Zoom="X" >
                     <lvc:CartesianChart.AxisY>
                         <lvc:Axis Title="Value" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
                     </lvc:CartesianChart.AxisY>
