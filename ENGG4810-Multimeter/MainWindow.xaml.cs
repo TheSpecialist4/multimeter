@@ -30,36 +30,13 @@ namespace ENGG4810_Multimeter
 
         public MainViewModel vm;
 
-
-        #region from view model
-        //public SeriesCollection SeriesCollection { get; set; }
-        //public string[] Labels { get; set; }
-        //public Func<double, string> YFormatter { get; set; }
-
-        //private Random random = new Random();
-        #endregion
-
         public MainWindow()
         {
             InitializeComponent();
 
             vm = (MainViewModel)this.DataContext;
 
-            #region fromviewmodel
-
-            //SeriesCollection = new SeriesCollection();
-
-            //YFormatter = value => value.ToString();
-
-            ////modifying the series collection will animate and update the chart
-            //SeriesCollection.Add(new LineSeries
-            //{
-            //    Title = "Data",
-            //    Values = new ChartValues<int>(),
-            //    LineSmoothness = 0.5 //straight lines, 1 really smooth lines
-            //});
-            #endregion
-        }
+       }
 
         private void btnConnected_Click(object sender, RoutedEventArgs e)
         {
@@ -79,22 +56,34 @@ namespace ENGG4810_Multimeter
 
         private void btnDisconnected_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Switching Mode? You will lose all unsaved data. Click OK to continue", 
-                "Unsaved Data", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+            if (vm.SeriesCollection[0].Values.Count != 0)
             {
-                vm.IsModeConnected = false;
-                btnConnected.BorderBrush = new SolidColorBrush(Colors.Transparent);
-                btnDisconnected.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9017a5"));
-
-                btnOpenFile.Visibility = Visibility.Visible;
-                btnSave.Visibility = Visibility.Collapsed;
-
-                btnPlay.Content = "\xE768";
-
-                vm.SwitchMode();
-
-                BeginStoryboard(this.FindResource("ModeLoadStoryboard") as Storyboard);
+                if (MessageBox.Show("Switching Mode? You will lose all unsaved data. Click OK to continue",
+                "Unsaved Data", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+                {
+                    SwitchToDisconnectedMode();
+                }
             }
+            else
+            {
+                SwitchToDisconnectedMode();
+            }
+        }
+
+        private void SwitchToDisconnectedMode()
+        {
+            vm.IsModeConnected = false;
+            btnConnected.BorderBrush = new SolidColorBrush(Colors.Transparent);
+            btnDisconnected.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9017a5"));
+
+            btnOpenFile.Visibility = Visibility.Visible;
+            btnSave.Visibility = Visibility.Collapsed;
+
+            btnPlay.Content = "\xE768";
+
+            vm.SwitchMode();
+
+            BeginStoryboard(this.FindResource("ModeLoadStoryboard") as Storyboard);
         }
 
         private void btnPlay_Click(object sender, RoutedEventArgs e)
@@ -113,6 +102,7 @@ namespace ENGG4810_Multimeter
             if (!vm.IsModeConnected)
             {
                 btnPlay.Content = "\xE768";
+                btnPlay.ToolTip = "Start Plotting";
                 vm.IsReading = false;
 
                 vm.StartGraphingDisconnected();

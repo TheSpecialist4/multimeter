@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Ports;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -92,6 +93,8 @@ namespace ENGG4810_Multimeter.ViewModel
 
         private Random random = new Random();
 
+        public SerialPort port { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.
         /// </summary>
@@ -99,7 +102,7 @@ namespace ENGG4810_Multimeter.ViewModel
         {
             IsModeConnected = true;
 
-            Value = "";
+            Value = "0";
             Unit = "A";
             DataType = "Current: ";
 
@@ -120,34 +123,44 @@ namespace ENGG4810_Multimeter.ViewModel
             });
         }
 
-        //public void StartGraphingConnected()
-        //{
-        //    for (int i = 0; i < 15; i++)
-        //    {
-        //        var next = random.Next(0, 20);
-        //        SeriesCollection[0].Values.Add(next);
-        //        Value = next.ToString() + Unit;
-        //    }
-        //    XAxisMin = SeriesCollection[0].Values.Count - 14;
-        //}
+        public bool TryConnectToPort()
+        {
+            port = SerialFacade.GetConnectedPort();
+
+            if (port == null)
+            {
+                return false;
+            }
+            return true;
+        }
 
         public void StartContinuousGraph()
         {
             while (IsReading)
             {
-                var next = random.Next(0, 20);
+                //var next = random.Next(0, 20);
 
-                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => {
-                    SeriesCollection[0].Values.Add(next);
-                    Value = next.ToString() + Unit;
-                }));
-                Thread.Sleep(500);
+                //Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+                //{
+                //    SeriesCollection[0].Values.Add(next);
+                //    Value = next.ToString();
+                //}));
+                //Thread.Sleep(500);
+
+                TryConnectToPort();
+
+                if (port != null)
+                {
+                    Debug.Print(port.PortName);
+                    SerialFacade.StartSerialReceive(port);
+                }
             }
         }
 
         public void SwitchMode()
         {
             SeriesCollection[0].Values.Clear();
+            Value = "0";
         }
 
         public void SaveData()
@@ -213,14 +226,14 @@ namespace ENGG4810_Multimeter.ViewModel
             for (int i = 1; i < data.Length; i++)
             {
                 SeriesCollection[0].Values.Add(int.Parse(data[i]));
-                Value = data[i] + Unit;
+                Value = data[i];
             }
         }
 
         public void DeleteGraphData()
         {
             SeriesCollection[0].Values.Clear();
-            Value = "";
+            Value = "0";
         }
     }
 }

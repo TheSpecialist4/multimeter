@@ -139,7 +139,10 @@
                 </StackPanel.Effect>
                 <StackPanel Orientation="Horizontal" Margin="10,10,0,-20">
                     <TextBlock Name="txtBlockDataHeading" Text="{Binding DataType}" FontSize="34" FontWeight="Light" Foreground="#17a398" />
-                    <TextBlock Text="{Binding Value}" FontSize="34" FontWeight="Light" Foreground="#17a398" />
+                    <TextBlock FontSize="34" FontWeight="Light" Foreground="#17a398">
+                        <Run Text="{Binding Value}" />
+                        <Run Text="{Binding Unit}" />
+                    </TextBlock>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="btnPlay" 
@@ -228,26 +231,16 @@
                     <StackPanel.Effect>
                         <DropShadowEffect Color="#FFE3E6EA" Direction="270" ShadowDepth="2.5"/>
                     </StackPanel.Effect>
-                    <StackPanel Orientation="Horizontal" Margin="10,5,10,5">
-                        <TextBlock x:Name="txtBlockValue"
-                                   Text="0.0" 
+                    <TextBlock x:Name="txtBlockValue"
                                    Padding="5" 
                                    FontWeight="Light" 
                                    Background="#708814"
                                    FontSize="50" 
                                    TextAlignment="Right" 
-                                   HorizontalAlignment="Stretch" Width="275"/>
-                        <TextBlock x:Name="txtBlockMultiUnit"
-                                   Text="{Binding Unit}" 
-                                   Padding="5,15,5,0" 
-                                   FontWeight="Light" 
-                                   Foreground="#CC000000"
-                                   Background="#FF708814"
-                                   FontSize="40"
-                                   Margin="-5,0,0,0"
-                                   TextAlignment="Center"
-                                    Width="50"/>
-                    </StackPanel>
+                                   HorizontalAlignment="Stretch">
+                            <Run Text="{Binding Value}" />
+                            <Run Text="{Binding Unit}" FontSize="40" Foreground="#CC000000" />
+                    </TextBlock>
                     <Grid Background="White">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
