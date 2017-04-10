@@ -101,6 +101,7 @@
         <!--<Grid Grid.RowSpan="2">
             <Rectangle Fill="White" Stretch="Fill" />
         </Grid>-->
+        <!-- #9017a5 purple-->
         <StackPanel Orientation="Horizontal" Background="#efefea">
             <Button x:Name="btnConnected"
                     Content="Connected" 
@@ -189,7 +190,7 @@
                         <lvc:Axis Title="Value" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
                     </lvc:CartesianChart.AxisY>
                     <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="Timestamp" Labels="{Binding Labels}" MinValue="{Binding XAxisMin}">
+                        <lvc:Axis Title="Timestamp" Labels="{Binding Labels}" MinValue="{Binding XAxisMin}" MaxValue="{Binding XAxisMax}">
                             <lvc:Axis.Separator>
                                 <lvc:Separator Step="1" />
                             </lvc:Axis.Separator>
@@ -207,7 +208,7 @@
                         BorderBrush="LightGray" Template="{DynamicResource AllButtonsTemplate}"/>
             </StackPanel>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="LightGray" />
-            <StackPanel Name="stackPanelMultimeter" Grid.Column="2" Margin="0" Background="#eeeaef">
+            <StackPanel Name="stackPanelMultimeter" Grid.Column="2" Margin="0" Background="#f7f7f7" Width="350">
                 <StackPanel Orientation="Horizontal" Background="LightGray">
                     <Button x:Name="btnMultimeterHide" 
                         Content="&#xE76C;" 

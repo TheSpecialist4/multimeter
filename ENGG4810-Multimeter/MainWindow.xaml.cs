@@ -1,24 +1,8 @@
 ﻿using ENGG4810_Multimeter.ViewModel;
-using LiveCharts;
-using LiveCharts.Wpf;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 
 namespace ENGG4810_Multimeter
 {
@@ -35,7 +19,6 @@ namespace ENGG4810_Multimeter
             InitializeComponent();
 
             vm = (MainViewModel)this.DataContext;
-
        }
 
         private void btnConnected_Click(object sender, RoutedEventArgs e)
@@ -108,21 +91,6 @@ namespace ENGG4810_Multimeter
                 vm.StartGraphingDisconnected();
             }
         }
-
-        #region from view model
-
-        //private void run()
-        //{
-        //    while (vm.IsReading)
-        //    {
-        //        var next = random.Next(0, 20);
-        //        Debug.Print($"added {next}\n");
-        //        SeriesCollection[0].Values.Add(next);
-        //        Thread.Sleep(500);
-        //    }
-        //}
-
-        #endregion
 
         private void btnMultimeterHide_Click(object sender, RoutedEventArgs e)
         {

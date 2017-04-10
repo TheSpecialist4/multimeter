@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
@@ -8,54 +9,70 @@ using System.Threading.Tasks;
 
 namespace ENGG4810_Multimeter
 {
-    public class SerialFacade
+    public class SerialFacade : ISerialFacade
     {
-        public static SerialPort GetConnectedPort()
+        private static SerialFacade INSTANCE;
+        private SerialPort port;
+
+        //public bool NewDataReceived { get; set; }
+        //public int NewDataCount { get; set; }
+
+        public ObservableCollection<string> IncomingData { get; set; }
+
+        private SerialFacade()
         {
-            var allPorts = GetAllPorts();
-
-            var connectedPort = GetRequiredPort(allPorts);
-
-            return connectedPort;
+            IncomingData = new ObservableCollection<string>();
         }
 
-        private static List<string> GetAllPorts()
+        public static SerialFacade GetInstance()
         {
-            var allPorts = new List<string>();
+            if (INSTANCE == null)
+            {
+                INSTANCE = new SerialFacade();
+            }
+            return INSTANCE;
+        }
+
+        public int GetData()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool SendData()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool SetupConnection()
+        {
+            foreach (var portName in GetPortNames())
+            {
+                var port = new SerialPort(portName);
+                port.Open();
+                if (port.ReadChar() != 0)
+                {
+                    this.port = port;
+                    this.port.DataReceived += Port_DataReceived;
+                    return true;
+                }
+                port.Close();
+            }
+            return false;
+        }
+
+        private void Port_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            IncomingData.Add(port.ReadExisting());
+        }
+
+        private List<string> GetPortNames()
+        {
+            List<string> ports = new List<string>();
             foreach (var port in SerialPort.GetPortNames())
             {
-                allPorts.Add(port);
+                ports.Add(port);
             }
-            return allPorts;
-        }
-
-        private static SerialPort GetRequiredPort(List<string> allPorts)
-        {
-            for (int i = 0; i < allPorts.Count; i++)
-            {
-                char[] inBuffer = new char[5]; 
-                SerialPort tempPort = new SerialPort(allPorts[i]);
-                tempPort.Open();
-                tempPort.Read(inBuffer, 0, 5);
-                if (char.IsDigit(inBuffer[0]))
-                {
-                    return tempPort;
-                }
-                tempPort.Close();
-            }
-            return null;
-        }
-
-        public static void StartSerialReceive(SerialPort port)
-        {
-            char[] inBuffer = new char[5];
-
-            int index = 0;
-            while (index < 5 && inBuffer[index] != '0')
-            {
-                Debug.Print(inBuffer[index++].ToString());
-                Debug.Print("\n");
-            }
+            return ports;
         }
     }
 }
