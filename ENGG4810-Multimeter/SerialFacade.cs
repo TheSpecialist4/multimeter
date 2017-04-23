@@ -53,10 +53,12 @@ namespace ENGG4810_Multimeter
                 {
                     this.port = port;
                     this.port.DataReceived += Port_DataReceived;
+                    Debug.Print($"Port connected successfully on {portName}");
                     return true;
                 }
                 port.Close();
             }
+            Debug.Print("couldnt connect to any port");
             return false;
         }
 

@@ -14,9 +14,15 @@ namespace ENGG4810_Multimeter
 
         public MainViewModel vm;
 
+        private Color buttonGreen;
+        private Color buttonGray;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            buttonGray = (Color)ColorConverter.ConvertFromString("#FFDDDDDD");
+            buttonGreen = (Color)ColorConverter.ConvertFromString("#48ea63");
 
             vm = (MainViewModel)this.DataContext;
        }
@@ -109,6 +115,11 @@ namespace ENGG4810_Multimeter
             vm.Unit = "\x03A9";
             vm.Value = "";
             vm.DataType = "Resistance: ";
+
+            btnResistance.Background = new SolidColorBrush(buttonGreen);
+
+            btnCurrent.Background = new SolidColorBrush(buttonGray);
+            btnVoltage.Background = new SolidColorBrush(buttonGray);
         }
 
         private void btnVoltage_Click(object sender, RoutedEventArgs e)
