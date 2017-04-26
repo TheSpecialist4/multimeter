@@ -117,8 +117,6 @@ namespace ENGG4810_Multimeter.ViewModel
             IsModeConnected = true;
             IsSerialWorking = false;
 
-            SetUpSerial();
-
             Value = "0";
             Unit = "A";
             DataType = "Current: ";
@@ -139,50 +137,65 @@ namespace ENGG4810_Multimeter.ViewModel
                 Values = new ChartValues<int>(),
                 LineSmoothness = 0.5 //straight lines, 1 really smooth lines
             });
+
+            //SetUpSerial();
         }
 
-        private void SetUpSerial()
+        public void SetUpSerial()
         {
             SerialHandler = SerialFacade.GetInstance();
             SerialHandler.IncomingData.CollectionChanged += SerialIncomingData_CollectionChanged;
 
-            //IsSerialWorking = SerialHandler.SetupConnection();
-            IsSerialWorking = true;
+            IsSerialWorking = SerialHandler.SetupConnection();
+            //IsSerialWorking = true;
         }
 
         private void SerialIncomingData_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.Action == NotifyCollectionChangedAction.Add)
+            if (e.Action == NotifyCollectionChangedAction.Add && IsReading)
             {
-                int value = int.Parse(SerialHandler.IncomingData[SerialHandler.IncomingData.Count - 1]);
-                SeriesCollection[0].Values.Add(value);
-            }
-        }
-
-        public void StartContinuousGraph()
-        {
-            while (IsReading && IsSerialWorking)
-            {
-                var next = random.Next(0, 20);
-
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
                 {
-                    SerialHandler.IncomingData.Add(next.ToString());
-                    Value = next.ToString();
+                    int value = int.Parse(SerialHandler.IncomingData[SerialHandler.IncomingData.Count - 1]);
+                    SeriesCollection[0].Values.Add(value);
                     if (SeriesCollection[0].Values.Count > 10)
                     {
                         XAxisMin++;
                         XAxisMax++;
                     }
+                    Debug.WriteLine(value + " added to graph");
                 }));
-                Thread.Sleep(500);
             }
+        }
+
+        public void StartContinuousGraph()
+        {
+            //while (IsReading && IsSerialWorking)
+            //{
+            //    var next = random.Next(0, 20);
+
+            //    Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+            //    {
+            //        SerialHandler.IncomingData.Add(next.ToString());
+            //        Value = next.ToString();
+            //        if (SeriesCollection[0].Values.Count > 10)
+            //        {
+            //            XAxisMin++;
+            //            XAxisMax++;
+            //        }
+            //        Thread.Sleep(500);
+            //    }));
+            //}
         }
 
         public void SwitchMode()
         {
             SeriesCollection[0].Values.Clear();
             Value = "0";
+            if (IsModeConnected)
+            {
+                SerialHandler.ClosePort();
+            }
         }
 
         public void SaveData()

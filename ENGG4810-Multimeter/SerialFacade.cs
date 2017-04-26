@@ -62,9 +62,29 @@ namespace ENGG4810_Multimeter
             return false;
         }
 
+        public void ClosePort()
+        {
+            port.Close();
+        }
+
         private void Port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            IncomingData.Add(port.ReadExisting());
+            //var value = port.ReadExisting();
+            //port.ReadByte();
+            byte[] buffer = new byte[2];
+            port.Read(buffer, 0, 1);
+            //foreach (var data in buffer)
+            //{
+            int value = BitConverter.ToInt16(buffer, 0);
+            Debug.WriteLine($"{value} read");
+            //Debug.WriteLine(buffer[0] + " read");
+            //}
+            IncomingData.Add(value.ToString());
+            //Debug.Print($"{IncomingData[IncomingData.Count - 1]} received and added to graph\n");
+
+            byte[] ack = new byte[1];
+            ack[0] = 0xff;
+            port.Write(ack, 0, 1);
         }
 
         private List<string> GetPortNames()

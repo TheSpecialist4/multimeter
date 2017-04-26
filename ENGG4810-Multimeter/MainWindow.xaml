@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="700" Width="1000"
         DataContext="{Binding Main, Source={StaticResource Locator}}"
-        >
+        Loaded="Window_Loaded">
     <Window.Resources>
         <Storyboard x:Key="ModeLoadStoryboard">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="mainGrid">
@@ -50,6 +50,34 @@
         </ControlTemplate>
         <ControlTemplate x:Key="AllButtonsTemplate" TargetType="{x:Type Button}">
             <Border x:Name="border" BorderBrush="Transparent" BorderThickness="2" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsDefaulted" Value="True">
+                    <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <!--<Setter Property="Background" TargetName="border" Value="#FFBEE6FD"/>-->
+                    <Setter Property="BorderBrush" TargetName="border" Value="Gray"/>
+                    <Setter Property="BorderThickness" TargetName="border" Value="2"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" TargetName="border" Value="Gray"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="Gray"/>
+                </Trigger>
+                <Trigger Property="ToggleButton.IsChecked" Value="True">
+                    <Setter Property="Background" TargetName="border" Value="#FFBCDDEE"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FF245A83"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" TargetName="border" Value="#FFF4F4F4"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FFADB2B5"/>
+                    <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="#FF838383"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="MultiButtonsTemplate" TargetType="{x:Type Button}">
+            <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="4,0,0,0" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
                 <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
             </Border>
             <ControlTemplate.Triggers>
@@ -256,8 +284,7 @@
                                 Grid.Column="0" 
                                 Content="Current" 
                                 Margin="10" 
-                                FontSize="20" 
-                                BorderBrush="LightGray"
+                                FontSize="20"
                                 HorizontalAlignment="Stretch" 
                                 Padding="15" 
                                 VerticalAlignment="Center"
@@ -300,6 +327,46 @@
                                 Template="{DynamicResource AllButtonsTemplate}"
                                 Click="btnVoltage_Click"/>
                     </Grid>
+                    <!--<StackPanel>
+                        <Button x:Name="btnCurrent" 
+                                Grid.Row="0" 
+                                Grid.Column="0" 
+                                Content="Current" 
+                                Margin="10" 
+                                FontSize="20" 
+                                BorderBrush="#FF85e263"
+                                HorizontalAlignment="Stretch" 
+                                Padding="15" 
+                                VerticalAlignment="Center"
+                                Background="Transparent"
+                                Template="{DynamicResource MultiButtonsTemplate}"
+                                Click="btnCurrent_Click"/>
+                        <Button x:Name="btnResistance" 
+                                Grid.Row="0" 
+                                Grid.Column="1" 
+                                Content="Resistance" 
+                                Margin="10" 
+                                FontSize="20" 
+                                BorderBrush="LightGray"
+                                HorizontalAlignment="Stretch" 
+                                Padding="15" 
+                                VerticalAlignment="Center"
+                                Background="Transparent"
+                                Template="{DynamicResource AllButtonsTemplate}"
+                                Click="btnResistance_Click"/>
+                        <Button x:Name="btnVoltage" 
+                                Grid.Row="1" 
+                                Grid.Column="0" 
+                                Content="Voltage" 
+                                Margin="10" 
+                                FontSize="20" 
+                                HorizontalAlignment="Stretch" 
+                                Padding="15" 
+                                VerticalAlignment="Center"
+                                Background="Transparent"
+                                Template="{DynamicResource AllButtonsTemplate}"
+                                Click="btnVoltage_Click"/>
+                    </StackPanel>-->
                 </StackPanel>
             </StackPanel>
         </Grid>

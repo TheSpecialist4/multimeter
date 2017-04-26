@@ -22,9 +22,11 @@ namespace ENGG4810_Multimeter
             InitializeComponent();
 
             buttonGray = (Color)ColorConverter.ConvertFromString("#FFDDDDDD");
-            buttonGreen = (Color)ColorConverter.ConvertFromString("#48ea63");
+            buttonGreen = (Color)ColorConverter.ConvertFromString("#85e263");
 
             vm = (MainViewModel)this.DataContext;
+
+            changeMultiBtnBorderToGreen("C");
        }
 
         private void btnConnected_Click(object sender, RoutedEventArgs e)
@@ -85,6 +87,7 @@ namespace ENGG4810_Multimeter
             if (vm.IsReading && vm.IsModeConnected)
             {
                 Task.Factory.StartNew(vm.StartContinuousGraph);
+                //vm.StartContinuousGraph();
                 return;
             }
 
@@ -106,27 +109,50 @@ namespace ENGG4810_Multimeter
         private void btnCurrent_Click(object sender, RoutedEventArgs e)
         {
             vm.Unit = "A";
-            vm.Value = "";
+            vm.Value = "0";
             vm.DataType = "Current: ";
+
+            changeMultiBtnBorderToGreen("C");
         }
 
         private void btnResistance_Click(object sender, RoutedEventArgs e)
         {
             vm.Unit = "\x03A9";
-            vm.Value = "";
+            vm.Value = "0";
             vm.DataType = "Resistance: ";
 
-            btnResistance.Background = new SolidColorBrush(buttonGreen);
-
-            btnCurrent.Background = new SolidColorBrush(buttonGray);
-            btnVoltage.Background = new SolidColorBrush(buttonGray);
+            changeMultiBtnBorderToGreen("R");
         }
 
         private void btnVoltage_Click(object sender, RoutedEventArgs e)
         {
             vm.DataType = "Voltage: ";
-            vm.Value = "";
+            vm.Value = "0";
             vm.Unit = "V";
+
+            changeMultiBtnBorderToGreen("V");
+        }
+
+        private void changeMultiBtnBorderToGreen(string buttonType)
+        {
+            btnResistance.Background = new SolidColorBrush(buttonGray);
+            btnCurrent.Background = new SolidColorBrush(buttonGray);
+            btnVoltage.Background = new SolidColorBrush(buttonGray);
+
+            switch (buttonType)
+            {
+                case "V":
+                    btnVoltage.Background = new SolidColorBrush(buttonGreen);
+                    break;
+                case "C":
+                    btnCurrent.Background = new SolidColorBrush(buttonGreen);
+                    break;
+                case "R":
+                    btnResistance.Background = new SolidColorBrush(buttonGreen);
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -148,6 +174,11 @@ namespace ENGG4810_Multimeter
                 btnPlay.Content = "\xE768";
                 vm.DeleteGraphData();
             }
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            vm.SetUpSerial();
         }
     }
 }

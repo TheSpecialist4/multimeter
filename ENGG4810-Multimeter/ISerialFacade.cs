@@ -14,5 +14,7 @@ namespace ENGG4810_Multimeter
         int GetData();
 
         bool SendData();
+
+        void ClosePort();
     }
 }
