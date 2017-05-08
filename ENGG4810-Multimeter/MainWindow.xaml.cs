@@ -26,7 +26,7 @@ namespace ENGG4810_Multimeter
 
             vm = (MainViewModel)this.DataContext;
 
-            changeMultiBtnBorderToGreen("C");
+            changeMultiBtnBorderToGreen("V");
        }
 
         private void btnConnected_Click(object sender, RoutedEventArgs e)

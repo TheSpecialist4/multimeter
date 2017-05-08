@@ -118,8 +118,8 @@ namespace ENGG4810_Multimeter.ViewModel
             IsSerialWorking = false;
 
             Value = "0";
-            Unit = "A";
-            DataType = "Current: ";
+            Unit = "V";
+            DataType = "Voltage: ";
 
             XAxisMin = 0;
             XAxisMax = 10;
@@ -134,7 +134,7 @@ namespace ENGG4810_Multimeter.ViewModel
             SeriesCollection.Add(new LineSeries
             {
                 Title = "Data",
-                Values = new ChartValues<int>(),
+                Values = new ChartValues<double>(),
                 LineSmoothness = 0.5 //straight lines, 1 really smooth lines
             });
 
@@ -156,13 +156,14 @@ namespace ENGG4810_Multimeter.ViewModel
             {
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
                 {
-                    int value = int.Parse(SerialHandler.IncomingData[SerialHandler.IncomingData.Count - 1]);
+                    double value = double.Parse(SerialHandler.IncomingData[SerialHandler.IncomingData.Count - 1]);
                     SeriesCollection[0].Values.Add(value);
                     if (SeriesCollection[0].Values.Count > 10)
                     {
                         XAxisMin++;
                         XAxisMax++;
                     }
+                    Value = value.ToString();
                     Debug.WriteLine(value + " added to graph");
                 }));
             }

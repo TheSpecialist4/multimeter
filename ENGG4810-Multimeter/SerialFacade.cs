@@ -64,22 +64,27 @@ namespace ENGG4810_Multimeter
 
         public void ClosePort()
         {
-            port.Close();
+            if (port != null)
+            {
+                port.Close();
+            }
         }
 
         private void Port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             //var value = port.ReadExisting();
             //port.ReadByte();
-            byte[] buffer = new byte[2];
-            port.Read(buffer, 0, 1);
+            byte[] buffer = new byte[4];
+            port.Read(buffer, 0, 4);
             //foreach (var data in buffer)
             //{
-            int value = BitConverter.ToInt16(buffer, 0);
+            uint value = BitConverter.ToUInt32(buffer, 0);
+            double calculatedValue = (value / 2525154.0) * 2.1;
+            calculatedValue = Math.Round(calculatedValue, 3);
             Debug.WriteLine($"{value} read");
             //Debug.WriteLine(buffer[0] + " read");
             //}
-            IncomingData.Add(value.ToString());
+            IncomingData.Add(calculatedValue.ToString());
             //Debug.Print($"{IncomingData[IncomingData.Count - 1]} received and added to graph\n");
 
             byte[] ack = new byte[1];
