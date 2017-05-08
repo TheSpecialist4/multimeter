@@ -160,7 +160,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*" />
                 <ColumnDefinition Width="5" />
-                <ColumnDefinition Name="columnMultimeter" Width="2*" MaxWidth="350" />
+                <ColumnDefinition Name="columnMultimeter" Width="auto" MaxWidth="350" />
             </Grid.ColumnDefinitions>
             <StackPanel Margin="10,0,5,10" Background="White">
                 <StackPanel.Effect>
@@ -236,7 +236,7 @@
                         BorderBrush="LightGray" Template="{DynamicResource AllButtonsTemplate}"/>
             </StackPanel>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="LightGray" />
-            <StackPanel Name="stackPanelMultimeter" Grid.Column="2" Margin="0" Background="#fafafa" Width="350">
+            <StackPanel Name="stackPanelMultimeter" Grid.Column="2" Margin="0" Background="#fafafa">
                 <StackPanel Orientation="Horizontal" Background="LightGray">
                     <Button x:Name="btnMultimeterHide" 
                         Content="&#xE76C;" 

@@ -226,17 +226,23 @@ namespace ENGG4810_Multimeter.ViewModel
             {
                 LoadFile();
             }
-            loadFileData();
+            //loadFileData();
         }
 
         public void LoadFile()
         {
             var openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "CSV FIle (*.csv)|*.csv";
+            openFileDialog.Filter = "CSV File (*.csv)|*.csv";
             if (openFileDialog.ShowDialog() == true)
             {
                 DataFileLocation = openFileDialog.FileName;
+                openFileDialog.FileOk += (s, e) => { loadFileData(); };
             }
+        }
+
+        private void OpenFileDialog_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void loadFileData()
