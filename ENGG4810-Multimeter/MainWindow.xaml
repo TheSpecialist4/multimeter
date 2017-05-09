@@ -270,7 +270,7 @@
                             <Run Text="{Binding Value}" />
                             <Run Text="{Binding Unit}" FontSize="40" Foreground="#CC000000" />
                     </TextBlock>
-                    <Grid Background="White">
+                    <!--<Grid Background="White">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
                             <RowDefinition Height="*" />
@@ -326,7 +326,7 @@
                                 VerticalAlignment="Center"
                                 Template="{DynamicResource AllButtonsTemplate}"
                                 Click="btnVoltage_Click"/>
-                    </Grid>
+                    </Grid>-->
                     <!--<StackPanel>
                         <Button x:Name="btnCurrent" 
                                 Grid.Row="0" 
