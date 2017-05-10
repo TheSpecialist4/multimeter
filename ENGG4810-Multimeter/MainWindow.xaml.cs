@@ -1,4 +1,5 @@
 ﻿using ENGG4810_Multimeter.ViewModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -135,24 +136,24 @@ namespace ENGG4810_Multimeter
 
         private void changeMultiBtnBorderToGreen(string buttonType)
         {
-            btnResistance.Background = new SolidColorBrush(buttonGray);
-            btnCurrent.Background = new SolidColorBrush(buttonGray);
-            btnVoltage.Background = new SolidColorBrush(buttonGray);
+            //btnResistance.Background = new SolidColorBrush(buttonGray);
+            //btnCurrent.Background = new SolidColorBrush(buttonGray);
+            //btnVoltage.Background = new SolidColorBrush(buttonGray);
 
-            switch (buttonType)
-            {
-                case "V":
-                    btnVoltage.Background = new SolidColorBrush(buttonGreen);
-                    break;
-                case "C":
-                    btnCurrent.Background = new SolidColorBrush(buttonGreen);
-                    break;
-                case "R":
-                    btnResistance.Background = new SolidColorBrush(buttonGreen);
-                    break;
-                default:
-                    break;
-            }
+            //switch (buttonType)
+            //{
+            //    case "V":
+            //        btnVoltage.Background = new SolidColorBrush(buttonGreen);
+            //        break;
+            //    case "C":
+            //        btnCurrent.Background = new SolidColorBrush(buttonGreen);
+            //        break;
+            //    case "R":
+            //        btnResistance.Background = new SolidColorBrush(buttonGreen);
+            //        break;
+            //    default:
+            //        break;
+            //}
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -179,6 +180,29 @@ namespace ENGG4810_Multimeter
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             vm.SetUpSerial();
+        }
+
+        private void chart_DataClick(object sender, LiveCharts.ChartPoint chartPoint)
+        {
+            MessageBox.Show("X: " + chartPoint.X + " Y: " + chartPoint.Y);
+        }
+
+        private void chart_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var pos = e.GetPosition(chart);
+            double xstep = (chart.ActualWidth) / 10;
+            double xsteps = 0;
+            while ((xsteps * xstep + 40) < pos.X) { xsteps++; }
+
+            double ystep = chart.ActualHeight / chart.AxisY.Count;
+            Debug.WriteLine("ystep: "+ chart.AxisY[0].Name + 
+                " step height: " + chart.AxisY[0].Labels[0]);
+            double ysteps = 0;
+            while ((ysteps * ystep) < pos.Y) { ysteps++; }
+            ysteps = chart.AxisY.Count - ysteps;
+
+            //MessageBox.Show("x: " + xsteps + " y: " + ysteps);
+
         }
     }
 }

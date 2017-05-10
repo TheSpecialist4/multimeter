@@ -104,21 +104,10 @@
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
-        <!--<Storyboard Name="playSimulationStoryboard" x:Key="SimulatePlayStoryboard" AutoReverse="True" RepeatBehavior="Forever">
-            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="rectangle">
-                <EasingColorKeyFrame KeyTime="0:0:0.4" Value="#FF7284A4"/>
-                <EasingColorKeyFrame KeyTime="0:0:0.6" Value="#FF327858"/>
-                <EasingColorKeyFrame KeyTime="0:0:0.8" Value="#FF6C4C1E"/>
-                <EasingColorKeyFrame KeyTime="0:0:1" Value="#FF340804"/>
-                <EasingColorKeyFrame KeyTime="0:0:1.2" Value="#FF270434"/>
-                <EasingColorKeyFrame KeyTime="0:0:1.4" Value="#FF17253d"/>
-            </ColorAnimationUsingKeyFrames>
-        </Storyboard>-->
     </Window.Resources>
     <Window.Triggers>
         <EventTrigger RoutedEvent="FrameworkElement.Loaded">
             <BeginStoryboard Storyboard="{StaticResource ModeLoadStoryboard}"/>
-            <!--<BeginStoryboard Storyboard="{StaticResource SimulatePlayStoryboard}"/>-->
         </EventTrigger>
     </Window.Triggers>
     <Grid>
@@ -157,21 +146,32 @@
                     <TranslateTransform/>
                 </TransformGroup>
             </Grid.RenderTransform>
+            <!--<Grid.Resources>
+                <Storyboard x:Key="CloseMultiStoryboard">
+                    <DoubleAnimation
+                        Storyboard.TargetName="columnMultimeter"
+                        Storyboard.TargetProperty="Width"
+                        To="0.0"
+                        Duration="0:0:0.1"/>
+                </Storyboard>
+                <Storyboard x:Key="OpenMultiStoryboard">
+                    <DoubleAnimation Storyboard.Target="{Binding MultiColWidth}"
+                                     To="300"
+                                     Duration="0:0:0.1" />
+                </Storyboard>
+            </Grid.Resources>-->
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*" />
-                <ColumnDefinition Width="5" />
-                <ColumnDefinition Name="columnMultimeter" Width="auto" MaxWidth="350" />
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition x:Name="columnMultimeter" MaxWidth="325" Width="325"/>
             </Grid.ColumnDefinitions>
             <StackPanel Margin="10,0,5,10" Background="White">
                 <StackPanel.Effect>
                     <DropShadowEffect BlurRadius="2" Direction="270" ShadowDepth="2.5" Color="#FFE3E6EA"/>
                 </StackPanel.Effect>
                 <StackPanel Orientation="Horizontal" Margin="10,10,0,-20">
-                    <TextBlock Name="txtBlockDataHeading" Text="{Binding DataType}" FontSize="34" FontWeight="Light" Foreground="#17a398" />
-                    <TextBlock FontSize="34" FontWeight="Light" Foreground="#17a398">
-                        <Run Text="{Binding Value}" />
-                        <Run Text="{Binding Unit}" />
-                    </TextBlock>
+                    <TextBlock x:Name="txtBlockDataHeading" Text="{Binding DataType}" FontSize="34" FontWeight="Light" Foreground="#17a398" />
+                    <TextBlock FontSize="34" FontWeight="Light" Foreground="#17a398"><Run Text="{Binding Value}" /><Run Text=" "/><Run Text="{Binding Unit}" /></TextBlock>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="btnPlay" 
@@ -213,9 +213,9 @@
                             Template="{DynamicResource AllButtonsTemplate}"/>
                 </StackPanel>
                 <!--<Rectangle x:Name="rectangle" Height="450" Fill="#17253d" Margin="10,0" />-->
-                <lvc:CartesianChart Name="chart" Series="{Binding SeriesCollection}" AnimationsSpeed="0:0:0.5" LegendLocation="Bottom" MinHeight="450" Zoom="X" >
+                <lvc:CartesianChart x:Name="chart" Series="{Binding SeriesCollection}" AnimationsSpeed="0:0:0.5" LegendLocation="Bottom" MinHeight="450" Zoom="X" DataClick="chart_DataClick" MouseLeftButtonUp="chart_MouseLeftButtonUp">
                     <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="Value" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
+                        <lvc:Axis Title="Value" LabelFormatter="{Binding YFormatter}"/>
                     </lvc:CartesianChart.AxisY>
                     <lvc:CartesianChart.AxisX>
                         <lvc:Axis Title="Timestamp" Labels="{Binding Labels}" MinValue="{Binding XAxisMin}" MaxValue="{Binding XAxisMax}">
@@ -236,7 +236,9 @@
                         BorderBrush="LightGray" Template="{DynamicResource AllButtonsTemplate}"/>
             </StackPanel>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="LightGray" />
-            <StackPanel Name="stackPanelMultimeter" Grid.Column="2" Margin="0" Background="#fafafa">
+            <!-- #fafafa -->
+            <StackPanel x:Name="stackPanelMultimeter" Grid.Column="2" Margin="0" Background="#dd002a22">
+                <!-- b07c9e dd002a22 -->
                 <StackPanel Orientation="Horizontal" Background="LightGray">
                     <Button x:Name="btnMultimeterHide" 
                         Content="&#xE76C;" 
@@ -256,117 +258,28 @@
                            Margin="5"
                            FontWeight="Thin"/>
                 </StackPanel>
-                <StackPanel Background="White" VerticalAlignment="Stretch" Margin="5">
-                    <StackPanel.Effect>
-                        <DropShadowEffect Color="#FFE3E6EA" Direction="270" ShadowDepth="2.5"/>
-                    </StackPanel.Effect>
+                <StackPanel Background="Transparent" VerticalAlignment="Stretch">
+                    <!-- white -->
+                    <!-- #708814 -->
                     <TextBlock x:Name="txtBlockValue"
-                                   Padding="5" 
+                                   Padding="0,50,10,0" 
                                    FontWeight="Light" 
-                                   Background="#708814"
-                                   FontSize="50" 
+                                   Background="#fcfcfc"
+                                   FontSize="60" 
                                    TextAlignment="Right" 
-                                   HorizontalAlignment="Stretch">
-                            <Run Text="{Binding Value}" />
-                            <Run Text="{Binding Unit}" FontSize="40" Foreground="#CC000000" />
-                    </TextBlock>
-                    <!--<Grid Background="White">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Button x:Name="btnCurrent" 
-                                Grid.Row="0" 
-                                Grid.Column="0" 
-                                Content="Current" 
-                                Margin="10" 
-                                FontSize="20"
-                                HorizontalAlignment="Stretch" 
-                                Padding="15" 
-                                VerticalAlignment="Center"
-                                Template="{DynamicResource AllButtonsTemplate}"
-                                Click="btnCurrent_Click"/>
-                        <Button x:Name="btnDummy2" 
-                                Grid.Row="1" 
-                                Grid.Column="1" 
-                                Content="Dummy" 
-                                Margin="10" 
-                                FontSize="20" 
-                                BorderBrush="LightGray"
-                                HorizontalAlignment="Stretch" 
-                                Padding="15" 
-                                VerticalAlignment="Center"
-                                IsEnabled="False"
-                                Template="{DynamicResource AllButtonsTemplate}"/>
-                        <Button x:Name="btnResistance" 
-                                Grid.Row="0" 
-                                Grid.Column="1" 
-                                Content="Resistance" 
-                                Margin="10" 
-                                FontSize="20" 
-                                BorderBrush="LightGray"
-                                HorizontalAlignment="Stretch" 
-                                Padding="15" 
-                                VerticalAlignment="Center"
-                                Template="{DynamicResource AllButtonsTemplate}"
-                                Click="btnResistance_Click"/>
-                        <Button x:Name="btnVoltage" 
-                                Grid.Row="1" 
-                                Grid.Column="0" 
-                                Content="Voltage" 
-                                Margin="10" 
-                                FontSize="20" 
-                                BorderBrush="LightGray"
-                                HorizontalAlignment="Stretch" 
-                                Padding="15" 
-                                VerticalAlignment="Center"
-                                Template="{DynamicResource AllButtonsTemplate}"
-                                Click="btnVoltage_Click"/>
-                    </Grid>-->
-                    <!--<StackPanel>
-                        <Button x:Name="btnCurrent" 
-                                Grid.Row="0" 
-                                Grid.Column="0" 
-                                Content="Current" 
-                                Margin="10" 
-                                FontSize="20" 
-                                BorderBrush="#FF85e263"
-                                HorizontalAlignment="Stretch" 
-                                Padding="15" 
-                                VerticalAlignment="Center"
-                                Background="Transparent"
-                                Template="{DynamicResource MultiButtonsTemplate}"
-                                Click="btnCurrent_Click"/>
-                        <Button x:Name="btnResistance" 
-                                Grid.Row="0" 
-                                Grid.Column="1" 
-                                Content="Resistance" 
-                                Margin="10" 
-                                FontSize="20" 
-                                BorderBrush="LightGray"
-                                HorizontalAlignment="Stretch" 
-                                Padding="15" 
-                                VerticalAlignment="Center"
-                                Background="Transparent"
-                                Template="{DynamicResource AllButtonsTemplate}"
-                                Click="btnResistance_Click"/>
-                        <Button x:Name="btnVoltage" 
-                                Grid.Row="1" 
-                                Grid.Column="0" 
-                                Content="Voltage" 
-                                Margin="10" 
-                                FontSize="20" 
-                                HorizontalAlignment="Stretch" 
-                                Padding="15" 
-                                VerticalAlignment="Center"
-                                Background="Transparent"
-                                Template="{DynamicResource AllButtonsTemplate}"
-                                Click="btnVoltage_Click"/>
-                    </StackPanel>-->
+                                   HorizontalAlignment="Stretch" Height="125">
+                        <Run Text="{Binding Value}" /><Run Text=" "/><Run Text="{Binding Unit}" FontSize="40" Foreground="#CC000000" /></TextBlock>
+                    <ListBox SelectionMode="Single" BorderBrush="Transparent" Background="Transparent" Foreground="White">
+                        <ListBoxItem Name="listBoxItemVoltage" IsSelected="True" Background="#002a22">
+                            <TextBlock Text="Voltage" FontSize="20" Margin="10" />
+                        </ListBoxItem>
+                        <ListBoxItem Name="listBoxItemCurrent" Background="#002a22">
+                            <TextBlock Text="Current" FontSize="20" Margin="10" />
+                        </ListBoxItem>
+                        <ListBoxItem Name="listBoxItemResistance" Background="#002a22">
+                            <TextBlock Text="Resistance" FontSize="20" Margin="10" />
+                        </ListBoxItem>
+                    </ListBox>
                 </StackPanel>
             </StackPanel>
         </Grid>

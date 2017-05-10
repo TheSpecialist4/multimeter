@@ -126,17 +126,25 @@ namespace ENGG4810_Multimeter.ViewModel
 
             DataFileLocation = "";
 
-            SeriesCollection = new SeriesCollection();
-
             YFormatter = value => value.ToString();
 
             //modifying the series collection will animate and update the chart
-            SeriesCollection.Add(new LineSeries
+            SeriesCollection = new SeriesCollection
             {
-                Title = "Data",
-                Values = new ChartValues<double>(),
-                LineSmoothness = 0.5 //straight lines, 1 really smooth lines
-            });
+                new LineSeries
+                {
+                    Title = "Data",
+                    Values = new ChartValues<double>(),
+                    LineSmoothness = 0.5 //straight lines, 1 really smooth lines
+                },
+                new LineSeries
+                {
+                    Title = "Low",
+                    Values = new ChartValues<double>(),
+                    LineSmoothness = 0.5,
+                    StrokeThickness = 0.5
+                }
+            };
 
             //SetUpSerial();
         }
@@ -226,18 +234,18 @@ namespace ENGG4810_Multimeter.ViewModel
             {
                 LoadFile();
             }
-            //loadFileData();
         }
 
         public void LoadFile()
         {
             var openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "CSV File (*.csv)|*.csv";
-            if (openFileDialog.ShowDialog() == true)
+            openFileDialog.FileOk += (s, e) =>
             {
                 DataFileLocation = openFileDialog.FileName;
-                openFileDialog.FileOk += (s, e) => { loadFileData(); };
-            }
+                LoadFileData();
+            };
+            openFileDialog.ShowDialog();
         }
 
         private void OpenFileDialog_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
@@ -245,7 +253,7 @@ namespace ENGG4810_Multimeter.ViewModel
             throw new NotImplementedException();
         }
 
-        private void loadFileData()
+        private void LoadFileData()
         {
             SeriesCollection[0].Values.Clear();
             string[] data = File.ReadAllText(DataFileLocation).Split(',');
@@ -267,7 +275,7 @@ namespace ENGG4810_Multimeter.ViewModel
             Unit = data[0];
             for (int i = 1; i < data.Length; i++)
             {
-                SeriesCollection[0].Values.Add(int.Parse(data[i]));
+                SeriesCollection[0].Values.Add(double.Parse(data[i]));
                 Value = data[i];
             }
         }
@@ -276,6 +284,11 @@ namespace ENGG4810_Multimeter.ViewModel
         {
             SeriesCollection[0].Values.Clear();
             Value = "0";
+        }
+
+        public void AddToLow(ChartPoint value)
+        {
+            SeriesCollection[1].Values.Add(value);
         }
     }
 }
