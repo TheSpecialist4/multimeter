@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="700" Width="1000"
         DataContext="{Binding Main, Source={StaticResource Locator}}"
-        >
+        Loaded="Window_Loaded">
     <Window.Resources>
         <Storyboard x:Key="ModeLoadStoryboard">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="mainGrid">
@@ -76,6 +76,34 @@
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
+        <ControlTemplate x:Key="MultiButtonsTemplate" TargetType="{x:Type Button}">
+            <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="4,0,0,0" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsDefaulted" Value="True">
+                    <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <!--<Setter Property="Background" TargetName="border" Value="#FFBEE6FD"/>-->
+                    <Setter Property="BorderBrush" TargetName="border" Value="Gray"/>
+                    <Setter Property="BorderThickness" TargetName="border" Value="2"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" TargetName="border" Value="Gray"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="Gray"/>
+                </Trigger>
+                <Trigger Property="ToggleButton.IsChecked" Value="True">
+                    <Setter Property="Background" TargetName="border" Value="#FFBCDDEE"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FF245A83"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" TargetName="border" Value="#FFF4F4F4"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FFADB2B5"/>
+                    <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="#FF838383"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
         <!--<Storyboard Name="playSimulationStoryboard" x:Key="SimulatePlayStoryboard" AutoReverse="True" RepeatBehavior="Forever">
             <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="rectangle">
                 <EasingColorKeyFrame KeyTime="0:0:0.4" Value="#FF7284A4"/>
@@ -101,6 +129,7 @@
         <!--<Grid Grid.RowSpan="2">
             <Rectangle Fill="White" Stretch="Fill" />
         </Grid>-->
+        <!-- #9017a5 purple-->
         <StackPanel Orientation="Horizontal" Background="#efefea">
             <Button x:Name="btnConnected"
                     Content="Connected" 
@@ -139,7 +168,10 @@
                 </StackPanel.Effect>
                 <StackPanel Orientation="Horizontal" Margin="10,10,0,-20">
                     <TextBlock Name="txtBlockDataHeading" Text="{Binding DataType}" FontSize="34" FontWeight="Light" Foreground="#17a398" />
-                    <TextBlock Text="{Binding Value}" FontSize="34" FontWeight="Light" Foreground="#17a398" />
+                    <TextBlock FontSize="34" FontWeight="Light" Foreground="#17a398">
+                        <Run Text="{Binding Value}" />
+                        <Run Text="{Binding Unit}" />
+                    </TextBlock>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="btnPlay" 
@@ -186,7 +218,7 @@
                         <lvc:Axis Title="Value" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
                     </lvc:CartesianChart.AxisY>
                     <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="Timestamp" Labels="{Binding Labels}" MinValue="{Binding XAxisMin}">
+                        <lvc:Axis Title="Timestamp" Labels="{Binding Labels}" MinValue="{Binding XAxisMin}" MaxValue="{Binding XAxisMax}">
                             <lvc:Axis.Separator>
                                 <lvc:Separator Step="1" />
                             </lvc:Axis.Separator>
@@ -204,7 +236,7 @@
                         BorderBrush="LightGray" Template="{DynamicResource AllButtonsTemplate}"/>
             </StackPanel>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="LightGray" />
-            <StackPanel Name="stackPanelMultimeter" Grid.Column="2" Margin="0" Background="#eeeaef">
+            <StackPanel Name="stackPanelMultimeter" Grid.Column="2" Margin="0" Background="#fafafa" Width="350">
                 <StackPanel Orientation="Horizontal" Background="LightGray">
                     <Button x:Name="btnMultimeterHide" 
                         Content="&#xE76C;" 
@@ -228,26 +260,16 @@
                     <StackPanel.Effect>
                         <DropShadowEffect Color="#FFE3E6EA" Direction="270" ShadowDepth="2.5"/>
                     </StackPanel.Effect>
-                    <StackPanel Orientation="Horizontal" Margin="10,5,10,5">
-                        <TextBlock x:Name="txtBlockValue"
-                                   Text="0.0" 
+                    <TextBlock x:Name="txtBlockValue"
                                    Padding="5" 
                                    FontWeight="Light" 
                                    Background="#708814"
                                    FontSize="50" 
                                    TextAlignment="Right" 
-                                   HorizontalAlignment="Stretch" Width="275"/>
-                        <TextBlock x:Name="txtBlockMultiUnit"
-                                   Text="{Binding Unit}" 
-                                   Padding="5,15,5,0" 
-                                   FontWeight="Light" 
-                                   Foreground="#CC000000"
-                                   Background="#FF708814"
-                                   FontSize="40"
-                                   Margin="-5,0,0,0"
-                                   TextAlignment="Center"
-                                    Width="50"/>
-                    </StackPanel>
+                                   HorizontalAlignment="Stretch">
+                            <Run Text="{Binding Value}" />
+                            <Run Text="{Binding Unit}" FontSize="40" Foreground="#CC000000" />
+                    </TextBlock>
                     <Grid Background="White">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
@@ -262,8 +284,7 @@
                                 Grid.Column="0" 
                                 Content="Current" 
                                 Margin="10" 
-                                FontSize="20" 
-                                BorderBrush="LightGray"
+                                FontSize="20"
                                 HorizontalAlignment="Stretch" 
                                 Padding="15" 
                                 VerticalAlignment="Center"
@@ -306,6 +327,46 @@
                                 Template="{DynamicResource AllButtonsTemplate}"
                                 Click="btnVoltage_Click"/>
                     </Grid>
+                    <!--<StackPanel>
+                        <Button x:Name="btnCurrent" 
+                                Grid.Row="0" 
+                                Grid.Column="0" 
+                                Content="Current" 
+                                Margin="10" 
+                                FontSize="20" 
+                                BorderBrush="#FF85e263"
+                                HorizontalAlignment="Stretch" 
+                                Padding="15" 
+                                VerticalAlignment="Center"
+                                Background="Transparent"
+                                Template="{DynamicResource MultiButtonsTemplate}"
+                                Click="btnCurrent_Click"/>
+                        <Button x:Name="btnResistance" 
+                                Grid.Row="0" 
+                                Grid.Column="1" 
+                                Content="Resistance" 
+                                Margin="10" 
+                                FontSize="20" 
+                                BorderBrush="LightGray"
+                                HorizontalAlignment="Stretch" 
+                                Padding="15" 
+                                VerticalAlignment="Center"
+                                Background="Transparent"
+                                Template="{DynamicResource AllButtonsTemplate}"
+                                Click="btnResistance_Click"/>
+                        <Button x:Name="btnVoltage" 
+                                Grid.Row="1" 
+                                Grid.Column="0" 
+                                Content="Voltage" 
+                                Margin="10" 
+                                FontSize="20" 
+                                HorizontalAlignment="Stretch" 
+                                Padding="15" 
+                                VerticalAlignment="Center"
+                                Background="Transparent"
+                                Template="{DynamicResource AllButtonsTemplate}"
+                                Click="btnVoltage_Click"/>
+                    </StackPanel>-->
                 </StackPanel>
             </StackPanel>
         </Grid>

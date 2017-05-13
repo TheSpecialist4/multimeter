@@ -1,24 +1,8 @@
 ﻿using ENGG4810_Multimeter.ViewModel;
-using LiveCharts;
-using LiveCharts.Wpf;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 
 namespace ENGG4810_Multimeter
 {
@@ -30,36 +14,20 @@ namespace ENGG4810_Multimeter
 
         public MainViewModel vm;
 
-
-        #region from view model
-        //public SeriesCollection SeriesCollection { get; set; }
-        //public string[] Labels { get; set; }
-        //public Func<double, string> YFormatter { get; set; }
-
-        //private Random random = new Random();
-        #endregion
+        private Color buttonGreen;
+        private Color buttonGray;
 
         public MainWindow()
         {
             InitializeComponent();
 
+            buttonGray = (Color)ColorConverter.ConvertFromString("#FFDDDDDD");
+            buttonGreen = (Color)ColorConverter.ConvertFromString("#85e263");
+
             vm = (MainViewModel)this.DataContext;
 
-            #region fromviewmodel
-
-            //SeriesCollection = new SeriesCollection();
-
-            //YFormatter = value => value.ToString();
-
-            ////modifying the series collection will animate and update the chart
-            //SeriesCollection.Add(new LineSeries
-            //{
-            //    Title = "Data",
-            //    Values = new ChartValues<int>(),
-            //    LineSmoothness = 0.5 //straight lines, 1 really smooth lines
-            //});
-            #endregion
-        }
+            changeMultiBtnBorderToGreen("V");
+       }
 
         private void btnConnected_Click(object sender, RoutedEventArgs e)
         {
@@ -79,22 +47,34 @@ namespace ENGG4810_Multimeter
 
         private void btnDisconnected_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Switching Mode? You will lose all unsaved data. Click OK to continue", 
-                "Unsaved Data", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+            if (vm.SeriesCollection[0].Values.Count != 0)
             {
-                vm.IsModeConnected = false;
-                btnConnected.BorderBrush = new SolidColorBrush(Colors.Transparent);
-                btnDisconnected.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9017a5"));
-
-                btnOpenFile.Visibility = Visibility.Visible;
-                btnSave.Visibility = Visibility.Collapsed;
-
-                btnPlay.Content = "\xE768";
-
-                vm.SwitchMode();
-
-                BeginStoryboard(this.FindResource("ModeLoadStoryboard") as Storyboard);
+                if (MessageBox.Show("Switching Mode? You will lose all unsaved data. Click OK to continue",
+                "Unsaved Data", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+                {
+                    SwitchToDisconnectedMode();
+                }
             }
+            else
+            {
+                SwitchToDisconnectedMode();
+            }
+        }
+
+        private void SwitchToDisconnectedMode()
+        {
+            vm.IsModeConnected = false;
+            btnConnected.BorderBrush = new SolidColorBrush(Colors.Transparent);
+            btnDisconnected.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9017a5"));
+
+            btnOpenFile.Visibility = Visibility.Visible;
+            btnSave.Visibility = Visibility.Collapsed;
+
+            btnPlay.Content = "\xE768";
+
+            vm.SwitchMode();
+
+            BeginStoryboard(this.FindResource("ModeLoadStoryboard") as Storyboard);
         }
 
         private void btnPlay_Click(object sender, RoutedEventArgs e)
@@ -107,32 +87,19 @@ namespace ENGG4810_Multimeter
             if (vm.IsReading && vm.IsModeConnected)
             {
                 Task.Factory.StartNew(vm.StartContinuousGraph);
+                //vm.StartContinuousGraph();
                 return;
             }
 
             if (!vm.IsModeConnected)
             {
                 btnPlay.Content = "\xE768";
+                btnPlay.ToolTip = "Start Plotting";
                 vm.IsReading = false;
 
                 vm.StartGraphingDisconnected();
             }
         }
-
-        #region from view model
-
-        //private void run()
-        //{
-        //    while (vm.IsReading)
-        //    {
-        //        var next = random.Next(0, 20);
-        //        Debug.Print($"added {next}\n");
-        //        SeriesCollection[0].Values.Add(next);
-        //        Thread.Sleep(500);
-        //    }
-        //}
-
-        #endregion
 
         private void btnMultimeterHide_Click(object sender, RoutedEventArgs e)
         {
@@ -142,22 +109,50 @@ namespace ENGG4810_Multimeter
         private void btnCurrent_Click(object sender, RoutedEventArgs e)
         {
             vm.Unit = "A";
-            vm.Value = "";
+            vm.Value = "0";
             vm.DataType = "Current: ";
+
+            changeMultiBtnBorderToGreen("C");
         }
 
         private void btnResistance_Click(object sender, RoutedEventArgs e)
         {
             vm.Unit = "\x03A9";
-            vm.Value = "";
+            vm.Value = "0";
             vm.DataType = "Resistance: ";
+
+            changeMultiBtnBorderToGreen("R");
         }
 
         private void btnVoltage_Click(object sender, RoutedEventArgs e)
         {
             vm.DataType = "Voltage: ";
-            vm.Value = "";
+            vm.Value = "0";
             vm.Unit = "V";
+
+            changeMultiBtnBorderToGreen("V");
+        }
+
+        private void changeMultiBtnBorderToGreen(string buttonType)
+        {
+            btnResistance.Background = new SolidColorBrush(buttonGray);
+            btnCurrent.Background = new SolidColorBrush(buttonGray);
+            btnVoltage.Background = new SolidColorBrush(buttonGray);
+
+            switch (buttonType)
+            {
+                case "V":
+                    btnVoltage.Background = new SolidColorBrush(buttonGreen);
+                    break;
+                case "C":
+                    btnCurrent.Background = new SolidColorBrush(buttonGreen);
+                    break;
+                case "R":
+                    btnResistance.Background = new SolidColorBrush(buttonGreen);
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -179,6 +174,11 @@ namespace ENGG4810_Multimeter
                 btnPlay.Content = "\xE768";
                 vm.DeleteGraphData();
             }
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            vm.SetUpSerial();
         }
     }
 }
