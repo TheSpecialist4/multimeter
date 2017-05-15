@@ -6,9 +6,9 @@
         xmlns:local="clr-namespace:ENGG4810_Multimeter"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="700" Width="1000"
+        Title="MainWindow" Height="730" Width="1030"
         DataContext="{Binding Main, Source={StaticResource Locator}}"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded" KeyDown="Window_KeyDown">
     <Window.Resources>
         <Storyboard x:Key="ModeLoadStoryboard">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="mainGrid">
@@ -76,6 +76,34 @@
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
+        <ControlTemplate x:Key="MaskButtonsTemplate" TargetType="{x:Type Button}">
+            <Border x:Name="border" BorderBrush="Transparent" BorderThickness="2" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsDefaulted" Value="True">
+                    <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <!--<Setter Property="Background" TargetName="border" Value="#FFBEE6FD"/>-->
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FF0B4C5F"/>
+                    <Setter Property="BorderThickness" TargetName="border" Value="1"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" TargetName="border" Value="Gray"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="Gray"/>
+                </Trigger>
+                <Trigger Property="ToggleButton.IsChecked" Value="True">
+                    <Setter Property="Background" TargetName="border" Value="#FFBCDDEE"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="#FF245A83"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" TargetName="border" Value="Transparent"/>
+                    <!--<Setter Property="BorderBrush" TargetName="border" Value="#FFADB2B5"/>-->
+                    <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="#FF838383"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
         <ControlTemplate x:Key="MultiButtonsTemplate" TargetType="{x:Type Button}">
             <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="4,0,0,0" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
                 <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
@@ -104,6 +132,11 @@
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
+        <Storyboard x:Key="ShowFileErrorStoryboard">
+            <DoubleAnimation Storyboard.TargetName="stackPanelError"
+                                                 Storyboard.TargetProperty="Height"
+                                                 To="30.0" Duration="0:0:0.1" />
+        </Storyboard>
     </Window.Resources>
     <Window.Triggers>
         <EventTrigger RoutedEvent="FrameworkElement.Loaded">
@@ -113,13 +146,27 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <!--<Grid Grid.RowSpan="2">
-            <Rectangle Fill="White" Stretch="Fill" />
-        </Grid>-->
+        <StackPanel x:Name="stackPanelError" Orientation="Horizontal" HorizontalAlignment="Center" Height="0">
+            <TextBlock Text="Error in file format" FontSize="16" Margin="5,5,15,5" FontWeight="Light" Foreground="#FFAA3226" />
+            <Button Template="{StaticResource AllButtonsTemplate}" Content="Dismiss">
+                <Button.Triggers>
+                    <EventTrigger RoutedEvent="Button.Click">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="stackPanelError"
+                                                 Storyboard.TargetProperty="Height"
+                                                 To="0.0" Duration="0:0:0.1" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Button.Triggers>
+            </Button>
+        </StackPanel>
         <!-- #9017a5 purple-->
-        <StackPanel Orientation="Horizontal" Background="#efefea">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Background="#efefea">
             <Button x:Name="btnConnected"
                     Content="Connected" 
                     FontSize="24" 
@@ -137,7 +184,7 @@
                     Margin="10,10,10,0"
                     Click="btnDisconnected_Click" />
         </StackPanel>
-        <Grid x:Name="mainGrid" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Background="#eeeaef">
+        <Grid x:Name="mainGrid" Grid.Row="2" RenderTransformOrigin="0.5,0.5" Background="#eeeaef">
             <Grid.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -213,7 +260,7 @@
                             Template="{DynamicResource AllButtonsTemplate}"/>
                 </StackPanel>
                 <!--<Rectangle x:Name="rectangle" Height="450" Fill="#17253d" Margin="10,0" />-->
-                <lvc:CartesianChart x:Name="chart" Series="{Binding SeriesCollection}" AnimationsSpeed="0:0:0.5" LegendLocation="Bottom" MinHeight="450" Zoom="X" DataClick="chart_DataClick" MouseLeftButtonUp="chart_MouseLeftButtonUp">
+                <lvc:CartesianChart x:Name="chart" Series="{Binding SeriesCollection}" AnimationsSpeed="0:0:0.5" LegendLocation="Bottom" MinHeight="400" Zoom="X" DataClick="chart_DataClick">
                     <lvc:CartesianChart.AxisY>
                         <lvc:Axis Title="Value" LabelFormatter="{Binding YFormatter}"/>
                     </lvc:CartesianChart.AxisY>
@@ -225,15 +272,99 @@
                         </lvc:Axis>
                     </lvc:CartesianChart.AxisX>
                 </lvc:CartesianChart>
-                <Button x:Name="btnDelete" 
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Name="stackPanelMasks" Orientation="Horizontal" Visibility="Collapsed">
+                        <StackPanel>
+                            <Label Content="X" Margin="10,40,0,0" FontSize="18" FontWeight="Light" />
+                            <Label Content="Y" Margin="10,5,0,0" FontSize="18" FontWeight="Light" />
+                        </StackPanel>
+                        <StackPanel Name="stackPanelLowMask" Margin="0,0,50,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Low" FontSize="22" FontWeight="Light" Margin="10,0,0,0" />
+                                <!--<Button Content="&#xE70D;" FontFamily="Segoe MDL2 Assets" 
+                                    Template="{StaticResource AllButtonsTemplate}"
+                                    Height="30" Width="30" FontSize="16"
+                                    Background="Transparent"
+                                    Margin="0,5,0,0"/>-->
+                            </StackPanel>
+                            <TextBox Name="txtBoxLowX" Height="30" Width="60" HorizontalAlignment="Left" 
+                                 Margin="15,0,0,10"
+                                 Text="{Binding MaskLowX}" FontSize="14" TextAlignment="Left" VerticalContentAlignment="Center"/>
+                            <TextBox Name="txtBoxLowY" Height="30" Width="60" HorizontalAlignment="Left" 
+                                 Margin="15,0,0,10"
+                                 Text="{Binding MaskLowY}" FontSize="14" TextAlignment="Left" VerticalContentAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Name="btnLowAdd" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" 
+                                    Template="{StaticResource MaskButtonsTemplate}"
+                                    FontSize="17" Height="30" Width="30" Background="Transparent"
+                                    Margin="10,0,0,0" Foreground="Green" Click="btnLowAdd_Click"/>
+                                <Button Name="btnLowEdit" Content="&#xE70F;" FontFamily="Segoe MDL2 Assets" 
+                                    Template="{StaticResource MaskButtonsTemplate}"
+                                    FontSize="17" Height="30" Width="30" Background="Transparent"
+                                    Margin="10,0,0,0" Foreground="Green" Click="btnLowEdit_Click"
+                                        Visibility="Collapsed"/>
+                                <Button Name="btnLowDelete" Content="&#xE74D;" FontFamily="Segoe MDL2 Assets" 
+                                    Template="{StaticResource MaskButtonsTemplate}"
+                                    FontSize="18" Height="30" Width="30" Background="Transparent"
+                                    Margin="5,0,0,0" Foreground="#FFDC4646"
+                                    IsEnabled="False" Click="btnLowDelete_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Content="X" Margin="10,40,0,0" FontSize="18" FontWeight="Light" />
+                        <Label Content="Y" Margin="10,5,0,0" FontSize="18" FontWeight="Light" />
+                    </StackPanel>
+                    <StackPanel Name="stackPanelHighMask" Grid.Column="1">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="High" FontSize="22" FontWeight="Light" Margin="10,0,0,0" />
+                            <!--<Button Content="&#xE70D;" FontFamily="Segoe MDL2 Assets" 
+                                    Template="{StaticResource AllButtonsTemplate}"
+                                    Height="30" Width="30" FontSize="16"
+                                    Background="Transparent"
+                                    Margin="0,5,0,0"/>-->
+                        </StackPanel>
+                        <TextBox Name="txtBoxHighX" Height="30" Width="60" HorizontalAlignment="Left" 
+                                 Margin="15,0,0,10"
+                                 Text="{Binding MaskHighX}" FontSize="14" TextAlignment="Left" VerticalContentAlignment="Center"/>
+                        <TextBox Name="txtBoxHighY" Height="30" Width="60" HorizontalAlignment="Left" 
+                                 Margin="15,0,0,10"
+                                 Text="{Binding MaskHighY}" FontSize="14" TextAlignment="Left" VerticalContentAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal">
+                                <Button Name="btnHighAdd" Content="&#xE710;" FontFamily="Segoe MDL2 Assets" 
+                                    Template="{StaticResource MaskButtonsTemplate}"
+                                    FontSize="17" Height="30" Width="30" Background="Transparent"
+                                    Margin="10,0,0,0" Foreground="Green"
+                                        Click="btnHighAdd_Click"/>
+                                <Button Name="btnHighEdit" Content="&#xE70F;" FontFamily="Segoe MDL2 Assets" 
+                                    Template="{StaticResource MaskButtonsTemplate}"
+                                    FontSize="17" Height="30" Width="30" Background="Transparent"
+                                    Margin="10,0,0,0" Foreground="Green"
+                                        Visibility="Collapsed" Click="btnHighEdit_Click"/>
+                                <Button Name="btnHighDelete" Content="&#xE74D;" FontFamily="Segoe MDL2 Assets" 
+                                    Template="{StaticResource MaskButtonsTemplate}"
+                                    FontSize="18" Height="30" Width="30" Background="Transparent"
+                                    Margin="5,0,0,0" Foreground="#FFDC4646"
+                                    IsEnabled="False" Click="btnHighDelete_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                    </StackPanel>
+                    <Button Grid.Column="1"
+                        x:Name="btnDelete" 
                         Content="Delete" 
                         HorizontalAlignment="Right" 
+                            VerticalAlignment="Top"
                         Margin="0,10,10,10"
                         FontSize="16" 
                         Padding="5"
                         MinWidth="70"
+                        Height="35"
                         Click="btnDelete_Click"
                         BorderBrush="LightGray" Template="{DynamicResource AllButtonsTemplate}"/>
+                </Grid>
             </StackPanel>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="LightGray" />
             <!-- #fafafa -->

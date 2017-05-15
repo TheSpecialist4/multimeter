@@ -70,6 +70,16 @@ namespace ENGG4810_Multimeter
             }
         }
 
+        public bool OpenPort()
+        {
+            if (port != null && port.IsOpen)
+            {
+                port.Open();
+                return true;
+            }
+            return SetupConnection();
+        }
+
         private void Port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             //var value = port.ReadExisting();

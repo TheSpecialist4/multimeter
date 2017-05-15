@@ -16,5 +16,7 @@ namespace ENGG4810_Multimeter
         bool SendData();
 
         void ClosePort();
+
+        bool OpenPort();
     }
 }

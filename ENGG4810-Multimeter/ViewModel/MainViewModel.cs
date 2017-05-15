@@ -102,6 +102,56 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
+        private string _maskLowX;
+        public string MaskLowX
+        {
+            get { return _maskLowX; }
+            set {
+                if (_maskLowX == value) return;
+                _maskLowX = value;
+                RaisePropertyChanged("MaskLowX");
+            }
+        }
+
+        private string _maskLowY;
+        public string MaskLowY
+        {
+            get { return _maskLowY; }
+            set {
+                if (_maskLowY == value) return;
+                _maskLowY = value;
+                RaisePropertyChanged("MaskLowY");
+            }
+        }
+
+        private string _maskHighX;
+        public string MaskHighX
+        {
+            get { return _maskHighX; }
+            set {
+                if (_maskHighX == value) return;
+                _maskHighX = value;
+                RaisePropertyChanged("MaskHighX");
+            }
+        }
+
+        private string _maskHighY;
+        public string MaskHighY
+        {
+            get { return _maskHighY; }
+            set {
+                if (_maskHighY == value) return;
+                _maskHighY = value;
+                RaisePropertyChanged("MaskHighY");
+            }
+        }
+
+        private double maskLowIndex;
+        private double maskHighIndex;
+
+        private double lowHighest = 3;
+        private double highLowest = 6;
+
         public string[] Labels { get; set; }
         public Func<double, string> YFormatter { get; set; }
 
@@ -137,13 +187,6 @@ namespace ENGG4810_Multimeter.ViewModel
                     Values = new ChartValues<double>(),
                     LineSmoothness = 0.5 //straight lines, 1 really smooth lines
                 },
-                new LineSeries
-                {
-                    Title = "Low",
-                    Values = new ChartValues<double>(),
-                    LineSmoothness = 0.5,
-                    StrokeThickness = 0.5
-                }
             };
 
             //SetUpSerial();
@@ -204,6 +247,55 @@ namespace ENGG4810_Multimeter.ViewModel
             if (IsModeConnected)
             {
                 SerialHandler.ClosePort();
+            }
+        }
+
+        public void SwitchToDisconnected()
+        {
+            IsModeConnected = false;
+            SerialHandler.ClosePort();
+            if (SeriesCollection.Count == 1)
+            {
+                SeriesCollection.Add(
+                    new LineSeries
+                    {
+                        Title = "Low",
+                        Values = new ChartValues<double>(),
+                        LineSmoothness = 0.1,
+                        StrokeThickness = 0.5
+                    });
+                SeriesCollection.Add(
+                    new LineSeries
+                    {
+                        Title = "High",
+                        Values = new ChartValues<double>(),
+                        LineSmoothness = 0.1,
+                        StrokeThickness = 0.5
+                    });
+            }
+            SeriesCollection[1].Values.Add(2.0);
+            SeriesCollection[2].Values.Add(6.0);
+
+            SeriesCollection[1].Values.Add(3.0);
+            SeriesCollection[2].Values.Add(10.0);
+
+            SeriesCollection[1].Values.Add(1.0);
+            SeriesCollection[2].Values.Add(8.0);
+
+            SeriesCollection[1].Values.Add(2.0);
+            SeriesCollection[2].Values.Add(7.0);
+        }
+
+        public void SwitchToConnected()
+        {
+            IsModeConnected = true;
+            if (!SerialHandler.OpenPort())
+            {
+                Debug.WriteLine("couldnt open port");
+            }
+            while(SeriesCollection.Count > 1)
+            {
+                SeriesCollection.RemoveAt(SeriesCollection.Count - 1);
             }
         }
 
@@ -286,9 +378,118 @@ namespace ENGG4810_Multimeter.ViewModel
             Value = "0";
         }
 
-        public void AddToLow(ChartPoint value)
+        public bool AddToLow(string xstring, string ystring)
         {
-            SeriesCollection[1].Values.Add(value);
+            double x, y;
+            if (double.TryParse(xstring, out x) && double.TryParse(ystring, out y))
+            {
+                if (y >= highLowest)
+                {
+                    return false;
+                }
+                if (x < SeriesCollection[1].Values.Count)
+                {
+                    SeriesCollection[1].Values.Insert((int)x, y);
+                    if (y > lowHighest) { lowHighest = y; }
+                    return true;
+                }
+                while (SeriesCollection[1].Values.Count < x)
+                {
+                    SeriesCollection[1].Values.Add(y);
+                }
+                SeriesCollection[1].Values.Add(y);
+                if (y > lowHighest) { lowHighest = y; }
+            }
+            return true;
+        }
+
+        public bool EditLow(string xstring, string ystring)
+        {
+            SeriesCollection[1].Values.RemoveAt((int)maskLowIndex);
+            return AddToLow(xstring, ystring);
+        }
+
+        public bool DeleteFromLow(string xValue)
+        {
+            double x;
+            if (double.TryParse(xValue, out x))
+            {
+                if (SeriesCollection[1].Values.Count < x) { return false; }
+                SeriesCollection[1].Values.RemoveAt((int)x);
+                return true;
+            }
+            return false;
+        }
+
+        public bool AddToHigh(string xstring, string ystring)
+        {
+            double x, y;
+            if (double.TryParse(xstring, out x) && double.TryParse(ystring, out y))
+            {
+                if (y <= lowHighest)
+                {
+                    return false;
+                }
+                if (x < SeriesCollection[2].Values.Count)
+                {
+                    SeriesCollection[2].Values.Insert((int)x, y);
+                    if (y < highLowest) { highLowest = y; }
+                    return true;
+                }
+                while (SeriesCollection[2].Values.Count < x)
+                {
+                    SeriesCollection[2].Values.Add(y);
+                }
+                SeriesCollection[2].Values.Add(y);
+                if (y < highLowest) { highLowest = y; }
+            }
+            return true;
+        }
+
+        public bool DeleteFromHigh(string xValue)
+        {
+            double x;
+            if (double.TryParse(xValue, out x))
+            {
+                if (SeriesCollection[2].Values.Count < x) { return false; }
+                SeriesCollection[2].Values.RemoveAt((int)x);
+                return true;
+            }
+            return false;
+        }
+
+        public bool EditHigh(string x, string y)
+        {
+            SeriesCollection[2].Values.RemoveAt((int)maskHighIndex);
+            return AddToHigh(x, y);
+        }
+
+        public string HandlePointClick(ChartPoint point)
+        {
+            if (SeriesCollection.IndexOf(point.SeriesView) == 1) //low
+            {
+                MaskLowX = point.X + "";
+                MaskLowY = point.Y + "";
+
+                MaskHighX = "";
+                MaskHighY = "";
+
+                maskLowIndex = point.X;
+
+                return "low";
+            } else if (SeriesCollection.IndexOf(point.SeriesView) == 2)
+            {
+                MaskHighX = point.X + "";
+                MaskHighY = point.Y + "";
+
+                MaskLowX = "";
+                MaskLowY = "";
+
+                maskHighIndex = point.X;
+
+                return "high";
+            }
+            return "";
         }
     }
 }

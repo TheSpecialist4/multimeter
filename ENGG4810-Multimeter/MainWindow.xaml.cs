@@ -26,13 +26,11 @@ namespace ENGG4810_Multimeter
             buttonGreen = (Color)ColorConverter.ConvertFromString("#85e263");
 
             vm = (MainViewModel)this.DataContext;
-
-            changeMultiBtnBorderToGreen("V");
        }
 
         private void btnConnected_Click(object sender, RoutedEventArgs e)
         {
-            vm.IsModeConnected = true;
+            vm.SwitchToConnected();
             btnDisconnected.BorderBrush = new SolidColorBrush(Colors.Transparent);
             btnConnected.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9017a5"));
 
@@ -41,7 +39,7 @@ namespace ENGG4810_Multimeter
             btnOpenFile.Visibility = Visibility.Collapsed;
             btnSave.Visibility = Visibility.Visible;
 
-            vm.SwitchMode();
+            stackPanelMasks.Visibility = Visibility.Collapsed;
 
             BeginStoryboard(this.FindResource("ModeLoadStoryboard") as Storyboard);
         }
@@ -64,7 +62,7 @@ namespace ENGG4810_Multimeter
 
         private void SwitchToDisconnectedMode()
         {
-            vm.IsModeConnected = false;
+            vm.SwitchToDisconnected();
             btnConnected.BorderBrush = new SolidColorBrush(Colors.Transparent);
             btnDisconnected.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9017a5"));
 
@@ -76,6 +74,8 @@ namespace ENGG4810_Multimeter
             vm.SwitchMode();
 
             BeginStoryboard(this.FindResource("ModeLoadStoryboard") as Storyboard);
+
+            stackPanelMasks.Visibility = Visibility.Visible;
         }
 
         private void btnPlay_Click(object sender, RoutedEventArgs e)
@@ -105,6 +105,9 @@ namespace ENGG4810_Multimeter
         private void btnMultimeterHide_Click(object sender, RoutedEventArgs e)
         {
             columnMultimeter.Width = new GridLength(0.0);
+
+            //BeginStoryboard(this.FindResource("ShowFileErrorStoryboard") as Storyboard);
+
         }
 
         private void btnCurrent_Click(object sender, RoutedEventArgs e)
@@ -184,25 +187,102 @@ namespace ENGG4810_Multimeter
 
         private void chart_DataClick(object sender, LiveCharts.ChartPoint chartPoint)
         {
-            MessageBox.Show("X: " + chartPoint.X + " Y: " + chartPoint.Y);
+            var chartType = vm.HandlePointClick(chartPoint);
+
+            btnLowDelete.IsEnabled = false;
+            btnHighDelete.IsEnabled = false;
+
+            switch(chartType)
+            {
+                case "low":
+                    btnLowDelete.IsEnabled = true;
+                    btnLowAdd.Visibility = Visibility.Collapsed;
+                    btnLowEdit.Visibility = Visibility.Visible;
+
+                    btnHighAdd.Content = "\xE710";
+                    break;
+                case "high":
+                    btnHighDelete.IsEnabled = true;
+                    btnHighAdd.Visibility = Visibility.Collapsed;
+                    btnHighEdit.Visibility = Visibility.Visible;
+
+                    btnLowAdd.Content = "\xE710";
+                    break;
+            }
         }
 
-        private void chart_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void btnLowAdd_Click(object sender, RoutedEventArgs e)
         {
-            var pos = e.GetPosition(chart);
-            double xstep = (chart.ActualWidth) / 10;
-            double xsteps = 0;
-            while ((xsteps * xstep + 40) < pos.X) { xsteps++; }
+            if (!vm.AddToLow(txtBoxLowX.Text, txtBoxLowY.Text))
+            {
+                txtBoxLowY.BorderBrush = new SolidColorBrush(Colors.Red);
+            }
+            else
+            {
+                txtBoxLowY.BorderBrush = new SolidColorBrush(Colors.Gray);
+            }
+        }
 
-            double ystep = chart.ActualHeight / chart.AxisY.Count;
-            Debug.WriteLine("ystep: "+ chart.AxisY[0].Name + 
-                " step height: " + chart.AxisY[0].Labels[0]);
-            double ysteps = 0;
-            while ((ysteps * ystep) < pos.Y) { ysteps++; }
-            ysteps = chart.AxisY.Count - ysteps;
+        private void btnLowEdit_Click(object sender, RoutedEventArgs e)
+        {
+            vm.EditLow(txtBoxLowX.Text, txtBoxLowY.Text);
+            btnLowEdit.Visibility = Visibility.Collapsed;
+            btnLowAdd.Visibility = Visibility.Visible;
+        }
 
-            //MessageBox.Show("x: " + xsteps + " y: " + ysteps);
+        private void btnLowDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (!vm.DeleteFromLow(txtBoxLowX.Text))
+            {
+                txtBoxLowX.BorderBrush = new SolidColorBrush(Colors.Red);
+            }
+            else
+            {
+                txtBoxLowX.BorderBrush = new SolidColorBrush(Colors.Gray);
+            }
+        }
 
+        private void btnHighAdd_Click(object sender, RoutedEventArgs e)
+        {
+            if (!vm.AddToHigh(txtBoxHighX.Text, txtBoxHighY.Text))
+            {
+                txtBoxHighY.BorderBrush = new SolidColorBrush(Colors.Red);
+            }
+            else
+            {
+                txtBoxHighY.BorderBrush = new SolidColorBrush(Colors.Gray);
+            }
+        }
+
+        private void btnHighDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (!vm.DeleteFromHigh(txtBoxHighX.Text))
+            {
+                txtBoxHighX.BorderBrush = new SolidColorBrush(Colors.Red);
+            }
+            else
+            {
+                txtBoxHighX.BorderBrush = new SolidColorBrush(Colors.Gray);
+            }
+        }
+
+        private void btnHighEdit_Click(object sender, RoutedEventArgs e)
+        {
+            vm.EditHigh(txtBoxHighX.Text, txtBoxHighY.Text);
+            btnHighAdd.Visibility = Visibility.Visible;
+            btnHighEdit.Visibility = Visibility.Collapsed;
+        }
+
+        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Escape)
+            {
+                btnLowAdd.Visibility = Visibility.Visible;
+                btnHighAdd.Visibility = Visibility.Visible;
+
+                btnLowEdit.Visibility = Visibility.Collapsed;
+                btnHighEdit.Visibility = Visibility.Collapsed;
+            }
         }
     }
 }
