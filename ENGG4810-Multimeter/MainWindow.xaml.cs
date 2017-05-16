@@ -31,6 +31,7 @@ namespace ENGG4810_Multimeter
         private void btnConnected_Click(object sender, RoutedEventArgs e)
         {
             vm.SwitchToConnected();
+
             btnDisconnected.BorderBrush = new SolidColorBrush(Colors.Transparent);
             btnConnected.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9017a5"));
 
@@ -41,7 +42,7 @@ namespace ENGG4810_Multimeter
 
             stackPanelMasks.Visibility = Visibility.Collapsed;
 
-            BeginStoryboard(this.FindResource("ModeLoadStoryboard") as Storyboard);
+            //BeginStoryboard(this.FindResource("ModeLoadStoryboard") as Storyboard);
         }
 
         private void btnDisconnected_Click(object sender, RoutedEventArgs e)
@@ -70,8 +71,6 @@ namespace ENGG4810_Multimeter
             btnSave.Visibility = Visibility.Collapsed;
 
             btnPlay.Content = "\xE768";
-
-            vm.SwitchMode();
 
             BeginStoryboard(this.FindResource("ModeLoadStoryboard") as Storyboard);
 
@@ -283,6 +282,11 @@ namespace ENGG4810_Multimeter
                 btnLowEdit.Visibility = Visibility.Collapsed;
                 btnHighEdit.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            vm.SendMode();
         }
     }
 }

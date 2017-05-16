@@ -240,15 +240,15 @@ namespace ENGG4810_Multimeter.ViewModel
             //}
         }
 
-        public void SwitchMode()
-        {
-            SeriesCollection[0].Values.Clear();
-            Value = "0";
-            if (IsModeConnected)
-            {
-                SerialHandler.ClosePort();
-            }
-        }
+        //public void SwitchMode()
+        //{
+        //    SeriesCollection[0].Values.Clear();
+        //    Value = "0";
+        //    if (IsModeConnected)
+        //    {
+        //        SerialHandler.ClosePort();
+        //    }
+        //}
 
         public void SwitchToDisconnected()
         {
@@ -490,6 +490,11 @@ namespace ENGG4810_Multimeter.ViewModel
                 return "high";
             }
             return "";
+        }
+
+        public void SendMode()
+        {
+            SerialHandler.SendZero();
         }
     }
 }

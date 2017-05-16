@@ -176,7 +176,7 @@
     </Window.Resources>
     <Window.Triggers>
         <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-            <BeginStoryboard Storyboard="{StaticResource ModeLoadStoryboard}"/>
+            <!--<BeginStoryboard Storyboard="{StaticResource ModeLoadStoryboard}"/>-->
         </EventTrigger>
     </Window.Triggers>
     <Grid>
@@ -220,6 +220,9 @@
                     Margin="10,10,10,0"
                     Click="btnDisconnected_Click" />
         </StackPanel>
+        <Grid Name="gridPortError" Grid.Row="2">
+            <TextBlock Text="Error in connecting to Port" FontSize="40" />
+        </Grid>
         <Grid x:Name="mainGrid" Grid.Row="2" RenderTransformOrigin="0.5,0.5" Background="#eeeaef">
             <Grid.RenderTransform>
                 <TransformGroup>
@@ -229,20 +232,6 @@
                     <TranslateTransform/>
                 </TransformGroup>
             </Grid.RenderTransform>
-            <!--<Grid.Resources>
-                <Storyboard x:Key="CloseMultiStoryboard">
-                    <DoubleAnimation
-                        Storyboard.TargetName="columnMultimeter"
-                        Storyboard.TargetProperty="Width"
-                        To="0.0"
-                        Duration="0:0:0.1"/>
-                </Storyboard>
-                <Storyboard x:Key="OpenMultiStoryboard">
-                    <DoubleAnimation Storyboard.Target="{Binding MultiColWidth}"
-                                     To="300"
-                                     Duration="0:0:0.1" />
-                </Storyboard>
-            </Grid.Resources>-->
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="5"/>
@@ -442,7 +431,8 @@
                                    Foreground="Yellow"
                                    FontSize="60" 
                                    TextAlignment="Left" 
-                                   HorizontalAlignment="Stretch" Height="125">
+                                   HorizontalAlignment="Stretch" Height="125"
+                                   TextWrapping="Wrap">
                         <Run Text="{Binding Value}" /><Run Text=" "/><Run Text="{Binding Unit}" FontSize="40" Foreground="#cec629" /></TextBlock>
                     <Separator Margin="5" />
                     <ListBox SelectionMode="Single" BorderBrush="Transparent" Background="Transparent" Foreground="White">
@@ -456,6 +446,7 @@
                             <TextBlock Text="Resistance" FontSize="20" Margin="10" />
                         </ListBoxItem>
                     </ListBox>
+                    <Button Content="Send data" Click="Button_Click" />
                 </StackPanel>
             </StackPanel>
         </Grid>

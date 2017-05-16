@@ -49,43 +49,66 @@ namespace ENGG4810_Multimeter
         {
             foreach (var portName in GetPortNames())
             {
-                var port = new SerialPort(portName);
+                port = new SerialPort(portName);
                 port.Open();
-                if (port.ReadChar() != 0)
+                System.Timers.Timer timer = new System.Timers.Timer(5000);
+                timer.Elapsed += Timer_Elapsed;
+                timer.Start();
+                try
                 {
-                    isConnected = true;
-                    this.port = port;
-                    //this.port.DataReceived += Port_DataReceived;
-                    Debug.Print($"Port connected successfully on {portName}");
-                    Task.Factory.StartNew(() =>
+                    if (port.ReadChar() != 0 && port.BytesToRead > 0)
                     {
-                        while(this.isConnected && port.IsOpen)
+                        isConnected = true;
+                        Debug.Print($"Port connected successfully on {portName}");
+                        byte[] ack = new byte[1];
+                        ack[0] = 0xFF;
+                        port.Write(ack, 0, 1);
+                        Task.Factory.StartNew(() =>
                         {
-                            int counter = 0;
-                            byte checker = 0;
-                            byte[] buffer = new byte[4];
-
-                            try
+                            while (this.isConnected && port.IsOpen)
                             {
+                                int counter = 0;
+                                byte checker = 0;
+                                byte[] buffer = new byte[4];
+                                
                                 checker = (byte)port.ReadByte();
                                 while (checker != 0)
                                 {
                                     buffer[counter++] = checker;
                                     checker = (byte)port.ReadByte();
                                 }
+                                if (counter == 4)
+                                {
+                                    Debug.WriteLine("sending ack for zero");
+                                    buffer[0] = 0xFF;
+                                    port.Write(buffer, 0, 1);
+                                }
                                 counter = 0;
+                                Debug.Write("buffer: " + BitConverter.ToString(buffer));
+                                Debug.WriteLine(" float " + BitConverter.ToSingle(buffer, 0));
+                                IncomingData.Add(BitConverter.ToSingle(buffer, 0).ToString());
                             }
-                            catch (Exception){}
-                            Debug.Write("buffer: " + BitConverter.ToString(buffer));
-                            Debug.WriteLine(" float " + BitConverter.ToSingle(buffer, 0));
-                        }
-                    });
-                    return true;
+                        });
+                        timer.Close();
+                        return true;
+                    }
+                } catch (Exception e)
+                {
+                    Debug.Print("couldnt connect to port");
+                    return false;
                 }
                 port.Close();
             }
             Debug.Print("couldnt connect to any port");
             return false;
+        }
+
+        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (!isConnected)
+            {
+                ClosePort();
+            }
         }
 
         public void ClosePort()
@@ -134,6 +157,13 @@ namespace ENGG4810_Multimeter
                 ports.Add(port);
             }
             return ports;
+        }
+
+        public void SendZero()
+        {
+            byte[] buffer = new byte[1];
+            buffer[0] = 0;
+            port.Write(buffer, 0, 1);
         }
     }
 }
