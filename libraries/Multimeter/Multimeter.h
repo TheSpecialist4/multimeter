@@ -75,7 +75,7 @@ class Multimeter
     ///
     /// @brief      Define the sampler
     ///
-    Multimeter(ScreenPins_t screen_pins, SamplerPins_t sampler_pins);
+    Multimeter(const ScreenPins_t screen_pins, const SamplerPins_t sampler_pins);
 
     ///
     /// @brief      Create the event

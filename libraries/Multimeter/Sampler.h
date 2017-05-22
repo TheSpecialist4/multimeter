@@ -28,13 +28,13 @@ class Sampler
   private:
     NAU7802 adc;
 
-    uint8_t lowRangePin;
-    uint8_t midRangePin;
-    uint8_t highRangePin;
+    const uint8_t lowRangePin;
+    const uint8_t midRangePin;
+    const uint8_t highRangePin;
 
-    uint8_t negPin;
-    uint8_t ledPin;
-    uint8_t peizoPin;
+    const uint8_t negPin;
+    const uint8_t ledPin;
+    const uint8_t peizoPin;
 
     uint8_t sampleMode;
     uint8_t ampState;
@@ -55,7 +55,8 @@ class Sampler
     ///
     /// @brief      Define the sampler
     ///
-    Sampler(uint8_t low_pin, uint8_t mid_pin, uint8_t high_pin, uint8_t neg_pin, uint8_t peizo_pin, uint8_t led_pin);
+    Sampler(const uint8_t low_pin, const uint8_t mid_pin, const uint8_t high_pin,
+            const uint8_t neg_pin, const uint8_t peizo_pin, const uint8_t led_pin);
 
     ///
     /// @brief      Create the event

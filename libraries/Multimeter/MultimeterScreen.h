@@ -105,7 +105,7 @@ class MultimeterScreen
       0b00000
     };
 
-    uint8_t brightnessPWMPin;
+    const uint8_t brightnessPWMPin;
     char strBuffer[11];
 
     uint8_t brightness;
@@ -116,7 +116,8 @@ class MultimeterScreen
     ///
     /// @brief      Define the screen
     ///
-    MultimeterScreen(uint8_t rs, uint8_t en, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7, uint8_t pwmPin);
+    MultimeterScreen(const uint8_t rs, const uint8_t en, const uint8_t d4, const uint8_t d5,
+                      const uint8_t d6, const uint8_t d7, const uint8_t pwmPin);
 
     ///
     /// @brief      Create the event

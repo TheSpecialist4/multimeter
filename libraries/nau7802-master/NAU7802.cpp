@@ -67,14 +67,13 @@ long NAU7802::readADC(){
   uint32_t adcVal = read24(NAU7802_ADC_B2);
   writeBit(NAU7802_PU_CTRL, NAU7802_CS);
   if(adcVal & 0x00800000){
-    adcVal = ~adcVal+1;
-    adcVal = -1*(adcVal & 0x00FFFFFF);
+    adcVal = 0;
   }
   return adcVal;
 }
 
 float NAU7802::readmV(){
-  return (_avcc/(float)16777216)*(float)readADC();
+  return (_avcc/(float)16777216)*((float)readADC()/_pga_gain);
 }
 
 //Select channel
@@ -121,22 +120,62 @@ void NAU7802::rate320sps(){
 //Set Pre-Gain Amplifier
 //======================
 void NAU7802::pga128x(){
+  clearBit(NAU7802_PGA_REG, 4);                 //Enable PGA
+  _pga_gain = 128.0;
+  write(NAU7802_GCAL1_B2, 0x00);
+  write(NAU7802_GCAL1_B3, 0x40);
 }
 void NAU7802::pga64x(){
+  clearBit(NAU7802_PGA_REG, 4);                 //Enable PGA
+  _pga_gain = 64.0;
+  write(NAU7802_GCAL1_B2, 0x00);
+  write(NAU7802_GCAL1_B3, 0x20);
 }
 void NAU7802::pga32x(){
+  clearBit(NAU7802_PGA_REG, 4);                 //Enable PGA
+  _pga_gain = 32.0;
+  write(NAU7802_GCAL1_B2, 0x00);
+  write(NAU7802_GCAL1_B3, 0x10);
 }
 void NAU7802::pga16x(){
+  clearBit(NAU7802_PGA_REG, 4);                 //Enable PGA
+  _pga_gain = 16.0;
+  write(NAU7802_GCAL1_B2, 0x00);
+  write(NAU7802_GCAL1_B3, 0x08);
 }
 void NAU7802::pga8x(){
+  clearBit(NAU7802_PGA_REG, 4);                 //Enable PGA
+  _pga_gain = 8.0;
+  write(NAU7802_GCAL1_B2, 0x00);
+  write(NAU7802_GCAL1_B3, 0x04);
 }
 void NAU7802::pga4x(){
+  clearBit(NAU7802_PGA_REG, 4);                 //Enable PGA
+  _pga_gain = 4.0;
+  write(NAU7802_GCAL1_B2, 0x00);
+  write(NAU7802_GCAL1_B3, 0x02);
 }
 void NAU7802::pga2x(){
+  clearBit(NAU7802_PGA_REG, 4);                 //Enable PGA
+  _pga_gain = 2.0;
+  write(NAU7802_GCAL1_B2, 0x00);
+  write(NAU7802_GCAL1_B3, 0x01);
 }
 void NAU7802::pga1x(){
+  clearBit(NAU7802_PGA_REG, 4);                 //Enable PGA
+  _pga_gain = 1.0;
+  write(NAU7802_GCAL1_B2, 0x80);
+  write(NAU7802_GCAL1_B3, 0x00);
 }
 void NAU7802::pgaDisable(){
+  writeBit(NAU7802_PGA_REG, 4);                 //Bypass PGA
+  _pga_gain = 1.0;
+}
+
+void NAU7802::noNeg(){
+  // write(NAU7802_OCAL1_B0, 0xFF);
+  // write(NAU7802_OCAL1_B1, 0xFF);
+  write(NAU7802_OCAL1_B2, 0x20);
 }
 
 //Set AVCC, Internal LDO

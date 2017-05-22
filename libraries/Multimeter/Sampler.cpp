@@ -15,7 +15,8 @@
 #include "Sampler.h"
 #include <Energia.h>
 
-Sampler::Sampler(uint8_t low_pin, uint8_t mid_pin, uint8_t high_pin, uint8_t neg_pin, uint8_t peizo_pin, uint8_t led_pin) :
+Sampler::Sampler(const uint8_t low_pin, const uint8_t mid_pin, const uint8_t high_pin,
+                  const uint8_t neg_pin, const uint8_t peizo_pin, const uint8_t led_pin) :
   adc(),
   lowRangePin(low_pin),
   midRangePin(mid_pin),

@@ -40,7 +40,7 @@ void Event::begin()
 
 uint32_t Event::waitFor(xdc_UInt andMask, xdc_UInt orMask)
 {
-    return Event_pend(EventHandle, andMask, orMask, BIOS_WAIT_FOREVER);
+    return Event_pend(EventHandle, andMask, orMask, BIOS_NO_WAIT);
 }
 
 void Event::send(xdc_UInt eventId_number)

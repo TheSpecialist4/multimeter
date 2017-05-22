@@ -28,76 +28,38 @@
 #include "Energia.h"
 
 // Include application, user and local libraries
-#include "Semaphore.h"
-#include "Event.h"
-#include "Mailbox.h"
+#include <Semaphore.h>
+#include <Event.h>
+#include <Mailbox.h>
+#include "sample_defn.h"
+#include "serial_defn.h"
+#include "Multimeter.h"
 
-// sample mode state definitions
-#define DC_VOLTAGE  0
-#define AC_VOLTAGE  1
-#define DC_CURRENT  2
-#define AC_CURRENT  3
-#define RESISTANCE  4
-#define CONTINUITY  5
-#define LOGIC       6
+// starting default configs
+#define DEFAULT_SAMPLE_MODE   DC_VOLTAGE
+#define DEFAULT_SAMPLE_PERIOD HALF_SEC
+#define DEFAULT_BRIGHTNESS    2
+#define MODALITY              BIOS_NO_WAIT
 
-// sample rate definitions
-#define HALF_SEC  500
-#define ONE_SEC   1000
-#define TWO_SEC   2000
-#define FIVE_SEC  5000
-#define TEN_SEC   10000
-#define ONE_MIN   60000
-#define TWO_MIN   120000
-#define FIVE_MIN  300000
-#define TEN_MIN   600000
-
-// instruction types
-#define BRIGHTNESS      0
-#define SAMPLE_MODE     1
-#define SAMPLE_RATE     2
-#define LOGGING_MODE    3
-#define LOGGING_RATE    4
-#define LOGGING_SIZE    5
-#define LOGGING_TOGGLE  6
-#define SAMPLE          7
-
-typedef union Sample_t {
-  uint32_t byteRep;
-  float floatRep;
-};
-
-typedef struct Typed_Sample_t {
-  Sample_t sample;
-  uint8_t type;
-};
-
-// instruction utility macros
-#define INSTR_BYTE(type, value) ( ((type) << 5) & ((value) & 0x1f) )
-#define INSTR_MODE(instr_byte)  ( ((instr_byte) >> 5) & 0x03 )
-#define INSTR_VALUE(instr_byte) ( (instr_byte) & 0x1f )
-
-// normal operation button press event definitions
-#define SAMPLE_MODE_BUTTON_PRESS  Event_Id_00
-#define SAMPLE_RATE_BUTTON_PRESS  Event_Id_01
-#define BRIGHTNESS_BUTTON_PRESS   Event_Id_02
-#define LOGGING_BUTTON_PRESS      Event_Id_03
-
-// logging input button press event definitions
-#define PLUS_100_INPUT  Event_Id_00
-#define PLUS_10_INPUT   Event_Id_01
-#define PLUS_1_INPUT    Event_Id_02
-
-// sample config change event definitions 
-#define SAMPLE_MODE_CHANGE  Event_Id_00
-#define SAMPLE_RATE_CHANGE  Event_Id_01
-
-///
-/// @brief  event for button presses
-///
+// semaphore for debug serial
 Semaphore serialSemaphore;
-Event sampleConfigChange;
-Mailbox<Typed_Sample_t> sampleMailbox;
+
+const ScreenPins_t screen_pins = {.rs = 5,
+                                  .en = 6,
+                                  .d4 = 25,
+                                  .d5 = 26,
+                                  .d6 = 27,
+                                  .d7 = 28,
+                                  .brightnessPWM = 19};
+
+const SamplerPins_t sampler_pins = {.low_pin = 40,
+                                    .mid_pin = 39,
+                                    .high_pin = 38,
+                                    .neg_pin = 8,
+                                    .peizo_pin = 37,
+                                    .led_pin = GREEN_LED};
+
+Multimeter multimeter(screen_pins, sampler_pins);
 
 // Add optional rtosSetup function
 void rtosSetup()
@@ -108,9 +70,12 @@ void rtosSetup()
     serialSemaphore.waitFor();
     Serial.println("rtosSetup");
     serialSemaphore.post();
+
+    multimeter.begin(DEFAULT_SAMPLE_MODE, DEFAULT_SAMPLE_PERIOD, DEFAULT_BRIGHTNESS);
     
-    sampleConfigChange.begin();
-    sampleMailbox.begin(5);
+    serialSemaphore.waitFor();
+    Serial.println("rtosSetup done");
+    serialSemaphore.post();
 }
 
 #endif

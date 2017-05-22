@@ -42,55 +42,31 @@
 // Core library for code-sense - IDE-based
 #include "Energia.h"
 
-#include <NAU7802.h>
+#include "Multimeter.h"
 
 // Include application, user and local libraries
 #include "rtosGlobals.h"
 
 // Prototypes
-
-// Define variables and constants
-NAU7802 adc;
-
-unsigned long samplePeriod = HALF_SEC;
 unsigned long lastTime = 0;
 unsigned long currentTime = 0;
 
-uint8_t sampleMode = DC_VOLTAGE;
-
-Typed_Sample_t newSample;
-
 // Add setup code
-void setup()
+void sampling_setup()
 {
-    adc.begin();
+  
 }
 
 // Add loop code
-void loop()
+void sampling_loop()
 {
-    currentTime = millis();
-    if (currentTime - lastTime >= samplePeriod)
-    {
-        lastTime = currentTime;
-        sample.type = sampleMode;
-        switch(sampleMode) {
-          case DC_VOLTAGE:
-          case AC_VOLTAGE:
-            sample.sample.floatRep = 1.0;
-            sampleMailbox.post(sample, BIOS_NO_WAIT);
-            break;
-          case DC_CURRENT:
-          case AC_CURRENT:
-            break;
-          case RESISTANCE:
-            break;
-          case CONTINUITY:
-            break;
-          case LOGIC:
-            break;
-        }
-        
-    }
+  currentTime = millis();
+  
+  if (currentTime - lastTime >= multimeter.getSamplePeriodMillis())
+  {
+    lastTime = currentTime;
+    multimeter.sample();
+  }
+  
+  delay(1);
 }
-

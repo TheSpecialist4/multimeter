@@ -20,7 +20,8 @@
 #define OHM         ((uint8_t) 5)
 #define PLUS_MINUS  ((uint8_t) 6)
 
-MultimeterScreen::MultimeterScreen(uint8_t rs, uint8_t en, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7, uint8_t pwmPin) :
+MultimeterScreen::MultimeterScreen(const uint8_t rs, const uint8_t en, const uint8_t d4, const uint8_t d5,
+                                    const uint8_t d6, const uint8_t d7, const uint8_t pwmPin) :
   lcd(rs, en, d4, d5, d6, d7),
   brightnessPWMPin(pwmPin)
 {

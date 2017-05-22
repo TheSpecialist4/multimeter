@@ -130,6 +130,8 @@ class NAU7802 {
   void pga1x();
   void pgaDisable();
 
+  void noNeg();
+
   void extAvcc(float extAvcc);
   void avcc2V4();
   void avcc2V7();
@@ -150,6 +152,7 @@ class NAU7802 {
 
   uint8_t _i2caddr;
   float _avcc = 3.3;
+  float _pga_gain = 1.0;
 
   void resetSettings();
   void calibrate();
