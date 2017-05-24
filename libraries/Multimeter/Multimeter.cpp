@@ -31,14 +31,15 @@
 #define LOGGING_INPUT   1
 #define LOGGING_ACTIVE  2
 
-Multimeter::Multimeter(ScreenPins_t screen_pins, SamplerPins_t sampler_pins) :
+Multimeter::Multimeter(ScreenPins_t screen_pins, SamplerPins_t sampler_pins, uint8_t logger_cs_pin) :
     screen(screen_pins.rs, screen_pins.en,
             screen_pins.d4, screen_pins.d5,
             screen_pins.d6, screen_pins.d7,
             screen_pins.brightnessPWM),
     sampler(sampler_pins.low_pin, sampler_pins.mid_pin,
             sampler_pins.high_pin, sampler_pins.neg_pin,
-            sampler_pins.peizo_pin, sampler_pins.led_pin)
+            sampler_pins.peizo_pin, sampler_pins.led_pin),
+    logger(logger_cs_pin)
 {
 }
 

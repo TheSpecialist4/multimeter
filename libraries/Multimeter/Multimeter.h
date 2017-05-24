@@ -22,6 +22,7 @@
 
 #include "Sampler.h"
 #include "MultimeterScreen.h"
+#include "Logger.h"
 
 #include "sample_defn.h"
 #include "serial_defn.h"
@@ -56,6 +57,7 @@ class Multimeter
   private:
     Sampler sampler;
     MultimeterScreen screen;
+    Logger logger;
 
     Semaphore samplerSemaphore;
     Semaphore screenSemaphore;
@@ -75,7 +77,7 @@ class Multimeter
     ///
     /// @brief      Define the sampler
     ///
-    Multimeter(const ScreenPins_t screen_pins, const SamplerPins_t sampler_pins);
+    Multimeter(const ScreenPins_t screen_pins, const SamplerPins_t sampler_pins, const uint8_t logger_cs_pin);
 
     ///
     /// @brief      Create the event
