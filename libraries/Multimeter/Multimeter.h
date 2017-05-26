@@ -32,6 +32,7 @@
 #define BUTTON_2_PRESS  Event_Id_01
 #define BUTTON_3_PRESS  Event_Id_02
 #define BUTTON_4_PRESS  Event_Id_03
+#define BUTTON_5_PRESS  Event_Id_04
 
 typedef struct ScreenPins_t {
     uint8_t rs;
@@ -44,9 +45,13 @@ typedef struct ScreenPins_t {
 };
 
 typedef struct SamplerPins_t {
-    uint8_t low_pin;
-    uint8_t mid_pin;
-    uint8_t high_pin;
+    uint8_t gain_low_pin;
+    uint8_t gain_mid_pin;
+    uint8_t gain_high_pin;
+    uint8_t resistor_1_pin;
+    uint8_t resistor_2_pin;
+    uint8_t mirror_switch_pin;
+    uint8_t switch_1_pin;
     uint8_t neg_pin;
     uint8_t peizo_pin;
     uint8_t led_pin;
@@ -57,11 +62,11 @@ class Multimeter
   private:
     Sampler sampler;
     MultimeterScreen screen;
-    Logger logger;
+    //Logger logger;
 
     Semaphore samplerSemaphore;
     Semaphore screenSemaphore;
-    Semaphore periodSemaphore;
+    Semaphore loggerSemaphore;
 
     Mailbox<TypedSample_t> serialTxMailbox;
 

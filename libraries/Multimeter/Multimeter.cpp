@@ -36,18 +36,24 @@ Multimeter::Multimeter(ScreenPins_t screen_pins, SamplerPins_t sampler_pins, uin
             screen_pins.d4, screen_pins.d5,
             screen_pins.d6, screen_pins.d7,
             screen_pins.brightnessPWM),
-    sampler(sampler_pins.low_pin, sampler_pins.mid_pin,
-            sampler_pins.high_pin, sampler_pins.neg_pin,
-            sampler_pins.peizo_pin, sampler_pins.led_pin),
-    logger(logger_cs_pin)
+    sampler(sampler_pins.gain_low_pin, sampler_pins.gain_mid_pin,
+            sampler_pins.gain_high_pin, sampler_pins.resistor_1_pin,
+            sampler_pins.resistor_2_pin, sampler_pins.mirror_switch_pin,
+            sampler_pins.switch_1_pin, sampler_pins.neg_pin,
+            sampler_pins.peizo_pin, sampler_pins.led_pin)
+    //logger(logger_cs_pin)
 {
 }
 
 void Multimeter::begin(uint8_t default_sample_mode, uint8_t default_sample_period, uint8_t default_brightness)
 {
-    screen.begin(default_brightness);
-    sampler.begin(default_sample_mode);
     sample_period = default_sample_period;
+    sampler.begin(default_sample_mode);
+    screen.begin(default_brightness);
+
+    //screen.displaySampleMode(sampler.getSampleMode());
+    //screen.displaySampleRate(sample_period);
+
     serialTxMailbox.begin(10);
 }
 

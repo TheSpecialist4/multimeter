@@ -11,13 +11,10 @@
 
 // Include application, user and local libraries
 #include "rtosGlobals.h"
-#include "MultimeterScreen.h"
 
 #define DEBOUNCE_TIME 100
 
 // Prototypes
-void functionPUSH1();
-void functionPUSH2();
 
 // Define variables and constants
 
@@ -35,7 +32,7 @@ Event buttonPressEvent;
 
 TypedSample_t sample;
 
-uint8_t rx;
+bool alive;
 
 // the setup routine runs once when you press reset:
 void setup()
@@ -48,15 +45,19 @@ void setup()
 
   pinMode(PUSH2, INPUT_PULLUP);
   attachInterrupt(PUSH2, functionPUSH2, FALLING);
+
+  alive = true;
 }
 
 // the loop routine runs over and over again forever:
 void loop()
 {
   uint32_t events = buttonPressEvent.waitFor(Event_Id_NONE, BUTTON_1_PRESS
-                    + BUTTON_1_PRESS
-                    + BUTTON_1_PRESS
-                    + BUTTON_1_PRESS );
+                    + BUTTON_2_PRESS
+                    + BUTTON_3_PRESS
+                    + BUTTON_4_PRESS
+                    + BUTTON_5_PRESS);
+
 
   multimeter.buttonPressed(events);
 
@@ -99,6 +100,16 @@ void functionPUSH4()
   if (push4Time - push4LastTime > DEBOUNCE_TIME)
   {
     buttonPressEvent.send(BUTTON_4_PRESS);
+  }
+  push4LastTime = push4Time;
+}
+
+void functionPUSH5()
+{
+  push4Time = millis();
+  if ((push4Time - push4LastTime > DEBOUNCE_TIME) && alive)
+  {
+    // do low power mode stuff
   }
   push4LastTime = push4Time;
 }

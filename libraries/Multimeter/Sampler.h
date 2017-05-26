@@ -19,18 +19,28 @@
 #include <NAU7802.h>
 #include "sample_defn.h"
 
-#define LOW_RANGE   0
-#define MID_RANGE   1
-#define HIGH_RANGE  2
+#define LOW_GAIN   0
+#define MID_GAIN   1
+#define HIGH_GAIN  2
+
+#define OHMETER_OFF     0
+#define SMALL_RESISTOR  1
+#define BIG_RESISTOR    2
 
 class Sampler
 {
   private:
     NAU7802 adc;
 
-    const uint8_t lowRangePin;
-    const uint8_t midRangePin;
-    const uint8_t highRangePin;
+    const uint8_t lowGainPin;
+    const uint8_t midGainPin;
+    const uint8_t highGainPin;
+
+    const uint8_t resistor1Pin;
+    const uint8_t resistor2Pin;
+
+    const uint8_t mirrorSwitchPin;
+    const uint8_t switch1Pin;
 
     const uint8_t negPin;
     const uint8_t ledPin;
@@ -38,8 +48,10 @@ class Sampler
 
     uint8_t sampleMode;
     uint8_t ampState;
+    uint8_t ohmeterState;
 
-    void setAmpState(uint8_t range);
+    void setAmpState(uint8_t state);
+    void setOhmeterState(uint8_t state);
     
     float getDCVoltage();
     float getACVoltage();
@@ -55,8 +67,9 @@ class Sampler
     ///
     /// @brief      Define the sampler
     ///
-    Sampler(const uint8_t low_pin, const uint8_t mid_pin, const uint8_t high_pin,
-            const uint8_t neg_pin, const uint8_t peizo_pin, const uint8_t led_pin);
+    Sampler(const uint8_t low_gain_pin, const uint8_t mid_gain_pin, const uint8_t high_gain_pin,
+            const uint8_t resistor_1_pin, const uint8_t resistor_2_pin, const uint8_t mirror_switch_pin,
+            const uint8_t switch_1_pin, const uint8_t neg_pin, const uint8_t peizo_pin, const uint8_t led_pin);
 
     ///
     /// @brief      Create the event

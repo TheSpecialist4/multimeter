@@ -52,12 +52,16 @@ const ScreenPins_t screen_pins = {.rs = 5,
                                   .d7 = 28,
                                   .brightnessPWM = 19};
 
-const SamplerPins_t sampler_pins = {.low_pin = 40,
-                                    .mid_pin = 39,
-                                    .high_pin = 38,
-                                    .neg_pin = 8,
+const SamplerPins_t sampler_pins = {.gain_low_pin = 15,
+                                    .gain_mid_pin = 18,
+                                    .gain_high_pin = 17,
+                                    .resistor_1_pin = 13,
+                                    .resistor_2_pin = 14,
+                                    .mirror_switch_pin = 0,
+                                    .switch_1_pin = 0,
+                                    .neg_pin = 29,
                                     .peizo_pin = 37,
-                                    .led_pin = GREEN_LED};
+                                    .led_pin = GREEN_LED}; // change to 5
 
 const uint8_t logger_cs_pin = 18;
 
