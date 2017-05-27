@@ -112,6 +112,8 @@ class MultimeterScreen
 
     uint8_t nextBrightness(uint8_t current_brightness);
 
+    void displayResolution(uint8_t resolution);
+
   public:
     ///
     /// @brief      Define the screen

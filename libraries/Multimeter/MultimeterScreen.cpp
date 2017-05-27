@@ -86,6 +86,61 @@ void MultimeterScreen::displaySample(TypedSample_t sample)
   }
 }
 
+void MultimeterScreen::displayResolution(uint8_t type, uint8_t resolution)
+{
+  lcd.setCursor(10, 1);
+  lcd.print("     ");
+  lcd.setCursor(10, 1);
+  switch(type){
+    case DC_VOLTAGE:
+    case AC_VOLTAGE:
+      lcd.print(PLUS_MINUS);
+      switch(resolution) {
+        case 1:
+          lcd.print("12");
+          break;
+        case 2:
+          lcd.print("5");
+          break;
+        case 3:
+          lcd.print("1");
+          break;
+      }
+      lcd.print("V");
+      break;
+    case DC_CURRENT:
+    case AC_CURRENT:
+      lcd.print(PLUS_MINUS);
+      switch(resolution) {
+        case 2:
+          lcd.print("200");
+          break;
+        case 3:
+          lcd.print("10");
+          break;
+      }
+      lcd.print("mA");
+      break;
+    case RESISTANCE:
+      lcd.print(PLUS_MINUS);
+      switch(resolution) {
+        case 1:
+          lcd.print("1k");
+          break;
+        case 2:
+          lcd.print("1M");
+          break;
+      }
+      lcd.print(OHM);
+      break;
+      break;
+    case CONTINUITY:
+      break;
+    case LOGIC:
+      break;
+  }
+}
+
 void MultimeterScreen::displaySampleMode(uint8_t sample_mode)
 {
   lcd.setCursor(0, 1);
@@ -119,31 +174,31 @@ void MultimeterScreen::displaySampleRate(uint8_t sample_period)
   lcd.setCursor(4, 1);
   switch(sample_period) {
     case HALF_SEC:
-      lcd.write("2/sec ");
+      lcd.write("2/s ");
       break;
     case ONE_SEC:
-      lcd.write("1/sec ");
+      lcd.write("1/s ");
       break;
     case TWO_SEC:
-      lcd.write("30/min");
+      lcd.write("30/m");
       break;
     case FIVE_SEC:
-      lcd.write("12/min");
+      lcd.write("12/m");
       break;
     case TEN_SEC:
-      lcd.write("6/min ");
+      lcd.write("6/m ");
       break;
     case ONE_MIN:
-      lcd.write("1/min ");
+      lcd.write("1/m ");
       break;
     case TWO_MIN:
-      lcd.write("30/hr ");
+      lcd.write("30/h");
       break;
     case FIVE_MIN:
-      lcd.write("12/hr ");
+      lcd.write("12/h");
       break;
     case TEN_MIN:
-      lcd.write("6/hr  ");
+      lcd.write("6/h ");
       break;
   }
 }
