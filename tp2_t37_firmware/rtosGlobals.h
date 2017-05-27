@@ -28,9 +28,9 @@
 #include "Energia.h"
 
 // Include application, user and local libraries
-#include <Semaphore.h>
-#include <Event.h>
-#include <Mailbox.h>
+#include "Semaphore.h"
+#include "Event.h"
+#include "Mailbox.h"
 #include "sample_defn.h"
 #include "serial_defn.h"
 #include "Multimeter.h"

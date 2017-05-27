@@ -47,12 +47,21 @@ Multimeter::Multimeter(ScreenPins_t screen_pins, SamplerPins_t sampler_pins, uin
 
 void Multimeter::begin(uint8_t default_sample_mode, uint8_t default_sample_period, uint8_t default_brightness)
 {
-    sample_period = default_sample_period;
-    sampler.begin(default_sample_mode);
-    screen.begin(default_brightness);
+    samplerSemaphore.begin();
+    screenSemaphore.begin();
+    loggerSemaphore.begin();
 
-    //screen.displaySampleMode(sampler.getSampleMode());
-    //screen.displaySampleRate(sample_period);
+    sample_period = default_sample_period;
+    
+    samplerSemaphore.waitFor();
+    sampler.begin(default_sample_mode);
+    samplerSemaphore.post();
+
+    screenSemaphore.waitFor();
+    screen.begin(default_brightness);
+    screen.displaySampleMode(sampler.getSampleMode());
+    screen.displaySampleRate(sample_period);
+    screenSemaphore.post();
 
     serialTxMailbox.begin(10);
 }
@@ -63,19 +72,31 @@ void Multimeter::buttonPressed(uint32_t button_event)
         case NOT_LOGGING:
             switch(button_event) {
                 case SAMPLE_MODE_BUTTON_PRESS:
+                    samplerSemaphore.waitFor();
                     sampler.incrementSampleMode();
+                    samplerSemaphore.post();
+
+                    screenSemaphore.waitFor();
                     screen.displaySampleMode(sampler.getSampleMode());
+                    screenSemaphore.post();
                     break;
                 case SAMPLE_RATE_BUTTON_PRESS:
                     sample_period = nextSamplePeriod(sample_period);
+
+                    screenSemaphore.waitFor();
                     screen.displaySampleRate(sample_period);
+                    screenSemaphore.post();
                     break;
                 case BRIGHTNESS_BUTTON_PRESS:
+                    screenSemaphore.waitFor();
                     screen.incrementBrightness();
+                    screenSemaphore.post();
                     break;
                 case LOGGING_BUTTON_PRESS:
                     logging_state = LOGGING_INPUT;
+                    screenSemaphore.waitFor();
                     screen.setLoggingConfigMode(sampler.getSampleMode(), sample_period);
+                    screenSemaphore.post();
                     break;
             }
             break;
@@ -107,13 +128,17 @@ void Multimeter::instructionReceived(Instruction_t instruction)
     switch(instruction.type)
     {
         case SAMPLE_MODE:
+            samplerSemaphore.waitFor();
             sampler.setSampleMode(instruction.value);
+            samplerSemaphore.post();
             break;
         case SAMPLE_RATE:
             sample_period = instruction.value;
             break;
         case BRIGHTNESS:
+            screenSemaphore.waitFor();
             screen.displayBrightness(instruction.value);
+            screenSemaphore.post();
             break;
         case LOGGING_MODE:
             break;
@@ -128,8 +153,13 @@ void Multimeter::instructionReceived(Instruction_t instruction)
 
 void Multimeter::sample()
 {
-    TypedSample_t new_sample = sampler.sample();
+    samplerSemaphore.waitFor();
+    TypedSample_t new_sample;// = sampler.sample();
+    samplerSemaphore.post();
+
+    screenSemaphore.waitFor();
     screen.displaySample(new_sample);
+    screenSemaphore.post();
     if (serialTxMailbox.available() < 10) {
         serialTxMailbox.post(new_sample, BIOS_NO_WAIT);
     }
