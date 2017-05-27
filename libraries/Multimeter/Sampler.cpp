@@ -16,16 +16,16 @@
 #include <Energia.h>
 
 Sampler::Sampler(const uint8_t low_gain_pin, const uint8_t mid_gain_pin, const uint8_t high_gain_pin,
-                const uint8_t resistor_1_pin, const uint8_t resistor_2_pin, const uint8_t mirror_switch_pin,
-                const uint8_t switch_1_pin, const uint8_t neg_pin, const uint8_t peizo_pin) :
+                const uint8_t small_resistor_pin, const uint8_t big_resistor_pin, const uint8_t ohmmeter_pin,
+                const uint8_t ampmeter_pin, const uint8_t neg_pin, const uint8_t peizo_pin) :
   adc(),
   lowGainPin(low_gain_pin),
   midGainPin(mid_gain_pin),
   highGainPin(high_gain_pin),
-  resistor1Pin(resistor_1_pin),
-  resistor2Pin(resistor_2_pin),
-  mirrorSwitchPin(mirror_switch_pin),
-  switch1Pin(switch_1_pin),
+  smallResistorPin(small_resistor_pin),
+  bigResistorPin(big_resistor_pin),
+  ohmmeterPin(ohmmeter_pin),
+  ampmeterPin(ampmeter_pin),
   negPin(neg_pin),
   peizoPin(peizo_pin),
   ampState(LOW_GAIN)
@@ -41,16 +41,22 @@ void Sampler::begin(uint8_t sample_mode)
   pinMode(midGainPin, OUTPUT);
   pinMode(highGainPin, OUTPUT);
 
-  pinMode(resistor1Pin, OUTPUT);
-  pinMode(resistor2Pin, OUTPUT);
-  pinMode(mirrorSwitchPin, OUTPUT);
-  pinMode(switch1Pin, OUTPUT);
+  pinMode(smallResistorPin, OUTPUT);
+  pinMode(bigResistorPin, OUTPUT);
+  pinMode(ohmmeterPin, OUTPUT);
+  pinMode(ampmeterPin, OUTPUT);
 
   sampleMode = sample_mode;
   setSampleMode(sampleMode);
+
+  configureADC();
+}
+
+void Sampler::configureADC()
+{
   adc.begin();
-  adc.noNeg();
-  //adc.pga2x();
+  //adc.rate080sps();
+  adc.pgaDisable();
 }
 
 void Sampler::setSampleMode(uint8_t sample_mode)
@@ -61,21 +67,21 @@ void Sampler::setSampleMode(uint8_t sample_mode)
     case AC_VOLTAGE:
       setAmpState(HIGH_GAIN);
       setOhmeterState(OHMETER_OFF);
-      digitalWrite(mirrorSwitchPin, LOW);
-      digitalWrite(switch1Pin, HIGH);
+      digitalWrite(ohmmeterPin, LOW);
+      digitalWrite(ampmeterPin, HIGH);
       break;
     case DC_CURRENT:
     case AC_CURRENT:
       setAmpState(HIGH_GAIN);
       setOhmeterState(OHMETER_OFF);
-      digitalWrite(mirrorSwitchPin, LOW);
-      digitalWrite(switch1Pin, LOW);
+      digitalWrite(ohmmeterPin, LOW);
+      digitalWrite(ampmeterPin, LOW);
       break;
     case RESISTANCE:
       setAmpState(HIGH_GAIN);
       setOhmeterState(SMALL_RESISTOR);
-      digitalWrite(mirrorSwitchPin, HIGH);
-      digitalWrite(switch1Pin, HIGH);
+      digitalWrite(ohmmeterPin, HIGH);
+      digitalWrite(ampmeterPin, HIGH);
       break;
     case CONTINUITY:
       break;
@@ -92,6 +98,13 @@ uint8_t Sampler::getSampleMode()
 void Sampler::incrementSampleMode()
 {
   setSampleMode((getSampleMode() + 1) % 7);
+}
+
+float Sampler::getADCmV()
+{
+  uint32_t val = adc.readRawADC();
+  Serial.println(val);
+  return (3.3/(float)16777216)*val;
 }
 
 TypedSample_t Sampler::sample()
@@ -125,24 +138,25 @@ TypedSample_t Sampler::sample()
 }
 
 float Sampler::getDCVoltage() {
+  return getADCmV();
   if (sign() == 1) {  // positive
     switch (ampState) {
       case LOW_GAIN:
-        return (0.9645 * adc.readmV()) + 174.06;
+        return (0.9645 * getADCmV()) + 174.06;
       case MID_GAIN:
-        return (0.2069 * adc.readmV()) + 0.04;
+        return (0.2069 * getADCmV()) + 0.04;
       case HIGH_GAIN:
-        return (0.0846 * adc.readmV()) + 0.1046;
+        return (0.0846 * getADCmV()) + 0.1046;
     }
     return 0.0;
   } else {  // negative
     switch (ampState) {
       case LOW_GAIN:
-        return (-0.9522 * adc.readmV()) + 180.76;
+        return (-0.9522 * getADCmV()) + 180.76;
       case MID_GAIN:
-        return (adc.readmV());
+        return (getADCmV());
       case HIGH_GAIN:
-        return adc.readmV();
+        return getADCmV();
     }
     return 0.0;
   }
@@ -151,59 +165,49 @@ float Sampler::getDCVoltage() {
 float Sampler::getACVoltage() {
   switch (ampState) {
     case LOW_GAIN:
-      return (0.9645 * adc.readmV()) + 174.06;
+      return (0.9645 * getADCmV()) + 174.06;
     case MID_GAIN:
-      return (0.2069 * adc.readmV()) + 0.04;
+      return (0.2069 * getADCmV()) + 0.04;
     case HIGH_GAIN:
-      return (0.0846 * adc.readmV()) + 0.1046;
+      return (0.0846 * getADCmV()) + 0.1046;
   }
   return 0.0;
 }
 
 float Sampler::getDCCurrent() {
-  if (sign() == 1) {  // positive
-    switch (ampState) {
-      case LOW_GAIN:
-        return (0.9645 * adc.readmV()) + 174.06;
-      case MID_GAIN:
-        return (0.2069 * adc.readmV()) + 0.04;
-      case HIGH_GAIN:
-        return (0.0846 * adc.readmV()) + 0.1046;
-    }
-    return 0.0;
-  } else {  // negative
-    switch (ampState) {
-      case LOW_GAIN:
-        return adc.readmV();
-      case MID_GAIN:
-        return adc.readmV();
-      case HIGH_GAIN:
-        return adc.readmV();
-    }
-    return 0.0;
+  switch (ampState) {
+    case LOW_GAIN:
+      return (0.9645 * getADCmV()) + 174.06;
+    case MID_GAIN:
+      return (0.2069 * getADCmV()) + 0.04;
+    case HIGH_GAIN:
+      return (0.0846 * getADCmV()) + 0.1046;
   }
+  return 0.0;
 }
 
 float Sampler::getACCurrent() {
   switch (ampState) {
     case LOW_GAIN:
-      return (0.9645 * adc.readmV()) + 174.06;
+      return (0.9645 * getADCmV()) + 174.06;
     case MID_GAIN:
-      return (0.2069 * adc.readmV()) + 0.04;
+      return (0.2069 * getADCmV()) + 0.04;
     case HIGH_GAIN:
-      return (0.0846 * adc.readmV()) + 0.1046;
+      return (0.0846 * getADCmV()) + 0.1046;
   }
   return 0.0;
 }
 
 float Sampler::getResistance() {
+  float val;
   switch(ohmeterState) {
     case OHMETER_OFF:
       return -1.0;
     case SMALL_RESISTOR:
-      return -1.0;
+      return (0.7174 * getADCmV()) + 210.86;
     case BIG_RESISTOR:
-      return -1.0;
+      val = getADCmV();
+      return (-0.0004 * val * val) + (0.9803 * val) + 190.32;
   }
 }
 
@@ -249,16 +253,16 @@ void Sampler::setOhmeterState(uint8_t state) {
   ohmeterState = state;
   switch(ohmeterState) {
     case OHMETER_OFF:
-      digitalWrite(resistor1Pin, HIGH);
-      digitalWrite(resistor2Pin, HIGH);
+      digitalWrite(smallResistorPin, HIGH);
+      digitalWrite(bigResistorPin, HIGH);
       break;
     case SMALL_RESISTOR:
-      digitalWrite(resistor1Pin, LOW);
-      digitalWrite(resistor2Pin, HIGH);
+      digitalWrite(smallResistorPin, LOW);
+      digitalWrite(bigResistorPin, HIGH);
       break;
     case BIG_RESISTOR:
-      digitalWrite(resistor1Pin, HIGH);
-      digitalWrite(resistor2Pin, LOW);
+      digitalWrite(smallResistorPin, HIGH);
+      digitalWrite(bigResistorPin, LOW);
       break;
   }
 }

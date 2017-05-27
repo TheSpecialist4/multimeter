@@ -36,11 +36,11 @@ class Sampler
     const uint8_t midGainPin;
     const uint8_t highGainPin;
 
-    const uint8_t resistor1Pin;
-    const uint8_t resistor2Pin;
+    const uint8_t smallResistorPin;
+    const uint8_t bigResistorPin;
 
-    const uint8_t mirrorSwitchPin;
-    const uint8_t switch1Pin;
+    const uint8_t ohmmeterPin;
+    const uint8_t ampmeterPin;
 
     const uint8_t negPin;
     const uint8_t peizoPin;
@@ -49,8 +49,12 @@ class Sampler
     uint8_t ampState;
     uint8_t ohmeterState;
 
+    void configureADC();
+
     void setAmpState(uint8_t state);
     void setOhmeterState(uint8_t state);
+
+    float getADCmV();
     
     float getDCVoltage();
     float getACVoltage();
@@ -67,8 +71,8 @@ class Sampler
     /// @brief      Define the sampler
     ///
     Sampler(const uint8_t low_gain_pin, const uint8_t mid_gain_pin, const uint8_t high_gain_pin,
-            const uint8_t resistor_1_pin, const uint8_t resistor_2_pin, const uint8_t mirror_switch_pin,
-            const uint8_t switch_1_pin, const uint8_t neg_pin, const uint8_t peizo_pin);
+            const uint8_t small_resistor_pin, const uint8_t big_resistor_pin, const uint8_t ohmmeter_pin,
+            const uint8_t ampmeter_pin, const uint8_t neg_pin, const uint8_t peizo_pin);
 
     ///
     /// @brief      Create the event

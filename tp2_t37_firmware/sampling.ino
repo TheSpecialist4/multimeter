@@ -66,9 +66,6 @@ void sampling_loop()
   {
     lastTime = currentTime;
     multimeter.sample();
-    serialSemaphore.waitFor();
-    Serial.println(lastTime);
-    serialSemaphore.post();
   }
   
   delay(1);

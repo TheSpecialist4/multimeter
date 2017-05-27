@@ -65,22 +65,22 @@ void setup_serial_communication()
 // Add loop code
 void loop_serial_communication()
 {
-//  if (multimeter.samplesAvailable()) {
-//    tx_sample = multimeter.dequeueSample();
-////    Serial1.write((tx_sample.sample.byteRep) & 0xff);
-////    Serial1.write((tx_sample.sample.byteRep >> 8) & 0xff);
-////    Serial1.write((tx_sample.sample.byteRep >> 16) & 0xff);
-////    Serial1.write((tx_sample.sample.byteRep >> 24) & 0xff);
-////    Serial1.write((byte) 0x00);
-//    Serial1.println("sample");
-//    //Serial.println("sample");
-//  }
-  
-  if (Serial1.available() > 0) {
-    serialSemaphore.waitFor();
-    Serial.println("rxed");
-    serialSemaphore.post();
-    rxbyte = Serial1.read();
-    Serial1.write(rxbyte);
+  if (multimeter.samplesAvailable()) {
+    tx_sample = multimeter.dequeueSample();
+//    Serial1.write((tx_sample.sample.byteRep) & 0xff);
+//    Serial1.write((tx_sample.sample.byteRep >> 8) & 0xff);
+//    Serial1.write((tx_sample.sample.byteRep >> 16) & 0xff);
+//    Serial1.write((tx_sample.sample.byteRep >> 24) & 0xff);
+//    Serial1.write((byte) 0x00);
+    Serial1.println(1);
+    //Serial.println("sample");
   }
+  
+//  if (Serial1.available() > 0) {
+//    serialSemaphore.waitFor();
+//    Serial.println("rxed");
+//    serialSemaphore.post();
+//    rxbyte = Serial1.read();
+//    Serial1.write(rxbyte);
+//  }
 }

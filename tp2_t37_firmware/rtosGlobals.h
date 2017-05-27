@@ -44,26 +44,26 @@
 // semaphore for debug serial
 Semaphore serialSemaphore;
 
-const ScreenPins_t screen_pins = {.rs = 5,
-                                  .en = 6,
-                                  .d4 = 25,
-                                  .d5 = 26,
-                                  .d6 = 27,
-                                  .d7 = 28,
-                                  .brightnessPWM = 19};
+const ScreenPins_t screen_pins = {.rs = 11,
+                                  .en = 12,
+                                  .d4 = 13,
+                                  .d5 = 34,
+                                  .d6 = 33,
+                                  .d7 = 32,
+                                  .brightnessPWM = 31};
 
-const SamplerPins_t sampler_pins = {.gain_low_pin = 15,
-                                    .gain_mid_pin = 18,
-                                    .gain_high_pin = 17,
-                                    .resistor_1_pin = 13,
-                                    .resistor_2_pin = 14,
-                                    .mirror_switch_pin = 0,
-                                    .switch_1_pin = 0,
+const SamplerPins_t sampler_pins = {.gain_low_pin = 25,
+                                    .gain_mid_pin = 26,
+                                    .gain_high_pin = 27,
+                                    .small_resistor_pin = 23,
+                                    .big_resistor_pin = 24,
+                                    .ohmmeter_pin = 8,
+                                    .ampmeter_pin = 30,
                                     .neg_pin = 29,
-                                    .peizo_pin = 37};
+                                    .peizo_pin = 35};
 
-const MiscPins_t misc_pins = {.sample_led_pin = GREEN_LED, // change to 5
-                              .status_led_pin = RED_LED,
+const MiscPins_t misc_pins = {.sample_led_pin = GREEN_LED, // 5
+                              .status_led_pin = RED_LED,  // 6
                               .logger_cs_pin = 18};
 
 

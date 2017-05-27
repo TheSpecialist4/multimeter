@@ -108,6 +108,7 @@ class NAU7802 {
   #endif //ESP8266|NAU7802_SOFTWAREWIRE|Default
 
   long readADC();
+  uint32_t readRawADC();
   float readmV();
 
   void selectCh1();

@@ -67,7 +67,19 @@ long NAU7802::readADC(){
   uint32_t adcVal = read24(NAU7802_ADC_B2);
   writeBit(NAU7802_PU_CTRL, NAU7802_CS);
   if(adcVal & 0x00800000){
-    adcVal = 0;
+    adcVal = ~adcVal+1;
+    adcVal = -1*(adcVal & 0x00FFFFFF);
+  }
+  return adcVal;
+}
+
+uint32_t NAU7802::readRawADC(){
+  readUntilTrue(NAU7802_PU_CTRL,NAU7802_CR);
+  uint32_t adcVal = read24(NAU7802_ADC_B2);
+  writeBit(NAU7802_PU_CTRL, NAU7802_CS);
+  if(adcVal & 0x00800000){
+    adcVal = (~adcVal+1) & 0x00FFFFFF;
+    // adcVal += 16777216;
   }
   return adcVal;
 }

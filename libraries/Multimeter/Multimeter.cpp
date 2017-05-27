@@ -37,9 +37,9 @@ Multimeter::Multimeter(ScreenPins_t screen_pins, SamplerPins_t sampler_pins, Mis
             screen_pins.d6, screen_pins.d7,
             screen_pins.brightnessPWM),
     sampler(sampler_pins.gain_low_pin, sampler_pins.gain_mid_pin,
-            sampler_pins.gain_high_pin, sampler_pins.resistor_1_pin,
-            sampler_pins.resistor_2_pin, sampler_pins.mirror_switch_pin,
-            sampler_pins.switch_1_pin, sampler_pins.neg_pin,
+            sampler_pins.gain_high_pin, sampler_pins.small_resistor_pin,
+            sampler_pins.big_resistor_pin, sampler_pins.ohmmeter_pin,
+            sampler_pins.ampmeter_pin, sampler_pins.neg_pin,
             sampler_pins.peizo_pin),
     sampleLedPin(misc_pins.sample_led_pin),
     statusLedPin(misc_pins.status_led_pin)
@@ -49,6 +49,9 @@ Multimeter::Multimeter(ScreenPins_t screen_pins, SamplerPins_t sampler_pins, Mis
 
 void Multimeter::begin(uint8_t default_sample_mode, uint8_t default_sample_period, uint8_t default_brightness)
 {
+    pinMode(sampleLedPin, OUTPUT);
+    pinMode(statusLedPin, OUTPUT);
+
     samplerSemaphore.begin();
     screenSemaphore.begin();
     loggerSemaphore.begin();
@@ -155,8 +158,9 @@ void Multimeter::instructionReceived(Instruction_t instruction)
 
 void Multimeter::sample()
 {
+    digitalWrite(sampleLedPin, HIGH);
     samplerSemaphore.waitFor();
-    TypedSample_t new_sample;// = sampler.sample();
+    TypedSample_t new_sample = sampler.sample();
     samplerSemaphore.post();
 
     screenSemaphore.waitFor();
@@ -165,6 +169,7 @@ void Multimeter::sample()
     if (serialTxMailbox.available() < 10) {
         serialTxMailbox.post(new_sample, BIOS_NO_WAIT);
     }
+    digitalWrite(sampleLedPin, LOW);
 }
 
 uint8_t Multimeter::nextSamplePeriod(uint8_t current_period)

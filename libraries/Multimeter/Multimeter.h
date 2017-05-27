@@ -48,10 +48,10 @@ typedef struct SamplerPins_t {
     uint8_t gain_low_pin;
     uint8_t gain_mid_pin;
     uint8_t gain_high_pin;
-    uint8_t resistor_1_pin;
-    uint8_t resistor_2_pin;
-    uint8_t mirror_switch_pin;
-    uint8_t switch_1_pin;
+    uint8_t small_resistor_pin;
+    uint8_t big_resistor_pin;
+    uint8_t ohmmeter_pin;
+    uint8_t ampmeter_pin;
     uint8_t neg_pin;
     uint8_t peizo_pin;
 };
