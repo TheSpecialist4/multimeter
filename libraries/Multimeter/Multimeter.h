@@ -54,7 +54,12 @@ typedef struct SamplerPins_t {
     uint8_t switch_1_pin;
     uint8_t neg_pin;
     uint8_t peizo_pin;
-    uint8_t led_pin;
+};
+
+typedef struct MiscPins_t {
+    uint8_t sample_led_pin;
+    uint8_t status_led_pin;
+    uint8_t logger_cs_pin;
 };
 
 class Multimeter
@@ -73,6 +78,9 @@ class Multimeter
     const unsigned long sample_period_millis[9] = {500, 1000, 2000, 5000,
                                 10000, 60000, 120000, 300000, 600000};
 
+    const uint8_t sampleLedPin;
+    const uint8_t statusLedPin;
+
     uint8_t sample_period;
     uint8_t logging_state;
 
@@ -82,7 +90,7 @@ class Multimeter
     ///
     /// @brief      Define the sampler
     ///
-    Multimeter(const ScreenPins_t screen_pins, const SamplerPins_t sampler_pins, const uint8_t logger_cs_pin);
+    Multimeter(const ScreenPins_t screen_pins, const SamplerPins_t sampler_pins, const MiscPins_t misc_pins);
 
     ///
     /// @brief      Create the event

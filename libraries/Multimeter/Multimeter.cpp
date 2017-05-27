@@ -31,7 +31,7 @@
 #define LOGGING_INPUT   1
 #define LOGGING_ACTIVE  2
 
-Multimeter::Multimeter(ScreenPins_t screen_pins, SamplerPins_t sampler_pins, uint8_t logger_cs_pin) :
+Multimeter::Multimeter(ScreenPins_t screen_pins, SamplerPins_t sampler_pins, MiscPins_t misc_pins) :
     screen(screen_pins.rs, screen_pins.en,
             screen_pins.d4, screen_pins.d5,
             screen_pins.d6, screen_pins.d7,
@@ -40,8 +40,10 @@ Multimeter::Multimeter(ScreenPins_t screen_pins, SamplerPins_t sampler_pins, uin
             sampler_pins.gain_high_pin, sampler_pins.resistor_1_pin,
             sampler_pins.resistor_2_pin, sampler_pins.mirror_switch_pin,
             sampler_pins.switch_1_pin, sampler_pins.neg_pin,
-            sampler_pins.peizo_pin, sampler_pins.led_pin)
-    //logger(logger_cs_pin)
+            sampler_pins.peizo_pin),
+    sampleLedPin(misc_pins.sample_led_pin),
+    statusLedPin(misc_pins.status_led_pin)
+//    logger(misc_pins.logger_cs_pin)
 {
 }
 

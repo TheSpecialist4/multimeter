@@ -17,7 +17,7 @@
 
 Sampler::Sampler(const uint8_t low_gain_pin, const uint8_t mid_gain_pin, const uint8_t high_gain_pin,
                 const uint8_t resistor_1_pin, const uint8_t resistor_2_pin, const uint8_t mirror_switch_pin,
-                const uint8_t switch_1_pin, const uint8_t neg_pin, const uint8_t peizo_pin, const uint8_t led_pin) :
+                const uint8_t switch_1_pin, const uint8_t neg_pin, const uint8_t peizo_pin) :
   adc(),
   lowGainPin(low_gain_pin),
   midGainPin(mid_gain_pin),
@@ -28,14 +28,12 @@ Sampler::Sampler(const uint8_t low_gain_pin, const uint8_t mid_gain_pin, const u
   switch1Pin(switch_1_pin),
   negPin(neg_pin),
   peizoPin(peizo_pin),
-  ledPin(led_pin),
   ampState(LOW_GAIN)
 {
 }
 
 void Sampler::begin(uint8_t sample_mode)
 {
-  pinMode(ledPin, OUTPUT);
   pinMode(peizoPin, OUTPUT);
   pinMode(negPin, INPUT_PULLDOWN);
   
@@ -98,7 +96,6 @@ void Sampler::incrementSampleMode()
 
 TypedSample_t Sampler::sample()
 {
-  digitalWrite(ledPin, HIGH);
   TypedSample_t s;
   s.type = sampleMode;
   switch (sampleMode) {
@@ -124,7 +121,6 @@ TypedSample_t Sampler::sample()
       s.sample.floatRep = getLogic();
       break;
   }
-  digitalWrite(ledPin, LOW);
   return s;
 }
 

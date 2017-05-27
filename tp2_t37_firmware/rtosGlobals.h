@@ -60,12 +60,14 @@ const SamplerPins_t sampler_pins = {.gain_low_pin = 15,
                                     .mirror_switch_pin = 0,
                                     .switch_1_pin = 0,
                                     .neg_pin = 29,
-                                    .peizo_pin = 37,
-                                    .led_pin = GREEN_LED}; // change to 5
+                                    .peizo_pin = 37};
 
-const uint8_t logger_cs_pin = 18;
+const MiscPins_t misc_pins = {.sample_led_pin = GREEN_LED, // change to 5
+                              .status_led_pin = RED_LED,
+                              .logger_cs_pin = 18};
 
-Multimeter multimeter(screen_pins, sampler_pins, logger_cs_pin);
+
+Multimeter multimeter(screen_pins, sampler_pins, misc_pins);
 
 // Add optional rtosSetup function
 void rtosSetup()

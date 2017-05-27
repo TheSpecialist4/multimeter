@@ -43,7 +43,6 @@ class Sampler
     const uint8_t switch1Pin;
 
     const uint8_t negPin;
-    const uint8_t ledPin;
     const uint8_t peizoPin;
 
     uint8_t sampleMode;
@@ -69,7 +68,7 @@ class Sampler
     ///
     Sampler(const uint8_t low_gain_pin, const uint8_t mid_gain_pin, const uint8_t high_gain_pin,
             const uint8_t resistor_1_pin, const uint8_t resistor_2_pin, const uint8_t mirror_switch_pin,
-            const uint8_t switch_1_pin, const uint8_t neg_pin, const uint8_t peizo_pin, const uint8_t led_pin);
+            const uint8_t switch_1_pin, const uint8_t neg_pin, const uint8_t peizo_pin);
 
     ///
     /// @brief      Create the event
