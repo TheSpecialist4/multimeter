@@ -19,11 +19,12 @@
 #include <NAU7802.h>
 #include "sample_defn.h"
 
-#define LOW_GAIN   0
-#define MID_GAIN   1
-#define HIGH_GAIN  2
+#define MIN_GAIN    0
+#define LOW_GAIN    1
+#define MID_GAIN    2
+#define HIGH_GAIN   3
 
-#define OHMETER_OFF     0
+#define OHMMETER_OFF    0
 #define SMALL_RESISTOR  1
 #define BIG_RESISTOR    2
 
@@ -47,22 +48,28 @@ class Sampler
 
     uint8_t sampleMode;
     uint8_t ampState;
-    uint8_t ohmeterState;
+    uint8_t ohmmeterState;
 
     void configureADC();
 
-    void setAmpState(uint8_t state);
-    void setOhmeterState(uint8_t state);
+    void setAmpState(uint8_t new_state);
+    void setOhmmeterState(uint8_t new_state);
 
     float getADCmV();
     
-    float getDCVoltage();
-    float getACVoltage();
-    float getDCCurrent();
-    float getACCurrent();
-    float getResistance();
-    float getContinuity();
-    float getLogic();
+    TypedSample_t getDCVoltage();
+    TypedSample_t getACVoltage();
+    TypedSample_t getDCCurrent();
+    TypedSample_t getACCurrent();
+    TypedSample_t getResistance();
+    TypedSample_t getContinuity();
+    TypedSample_t getLogic();
+
+    float calcDCVoltage(uint8_t amp_state);
+    float calcACVoltage(uint8_t amp_state);
+    float calcDCCurrent(uint8_t amp_state);
+    float calcACCurrent(uint8_t amp_state);
+    float calcResistance(uint8_t ohmeter_state);
 
     int sign();
 

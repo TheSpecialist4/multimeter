@@ -28,8 +28,9 @@ typedef union Sample_t {
 };
 
 typedef struct TypedSample_t {
-  Sample_t sample;
+  Sample_t value;
   uint8_t type;
+  uint8_t resolution;
 };
 
 #endif

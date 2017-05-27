@@ -76,11 +76,11 @@ void loop_serial_communication()
     //Serial.println("sample");
   }
   
-//  if (Serial1.available() > 0) {
-//    serialSemaphore.waitFor();
-//    Serial.println("rxed");
-//    serialSemaphore.post();
-//    rxbyte = Serial1.read();
-//    Serial1.write(rxbyte);
-//  }
+  if (Serial1.available() > 0) {
+    serialSemaphore.waitFor();
+    Serial.println("rxed");
+    serialSemaphore.post();
+    rxbyte = Serial1.read();
+    Serial1.write(rxbyte);
+  }
 }

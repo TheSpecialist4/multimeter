@@ -49,7 +49,7 @@ void MultimeterScreen::displaySample(TypedSample_t sample)
   lcd.setCursor(0, 0);
   lcd.write("                ");
   lcd.setCursor(0, 0);
-  if (sample.sample.floatRep == NAN)
+  if (sample.value.floatRep == NAN)
   {
     lcd.write("OVER LIMIT");
     return;
@@ -57,27 +57,27 @@ void MultimeterScreen::displaySample(TypedSample_t sample)
   switch(sample.type) {
     case DC_VOLTAGE:
     case AC_VOLTAGE:
-      snprintf(strBuffer, 10, "%fV", sample.sample.floatRep);
+      snprintf(strBuffer, 10, "%fV", sample.value.floatRep);
       lcd.write(strBuffer);
       break;
     case DC_CURRENT:
     case AC_CURRENT:
-      snprintf(strBuffer, 10, "%fA", sample.sample.floatRep);
+      snprintf(strBuffer, 10, "%fA", sample.value.floatRep);
       break;
     case RESISTANCE:
-      snprintf(strBuffer, 10, "%f", sample.sample.floatRep);
+      snprintf(strBuffer, 10, "%f", sample.value.floatRep);
       lcd.write(strBuffer);
       lcd.write(OHM);
       break;
     case CONTINUITY:
-      if (sample.sample.floatRep > 1) {
+      if (sample.value.floatRep > 1) {
         lcd.write("CONNECTED");
       } else {
         lcd.write("DISCONNECTED");
       }
       break;
     case LOGIC:
-      if (sample.sample.floatRep > 1) {
+      if (sample.value.floatRep > 1) {
         lcd.write("ON");
       } else {
         lcd.write("OFF");
