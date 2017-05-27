@@ -104,13 +104,4 @@ void functionPUSH4()
   push4LastTime = push4Time;
 }
 
-void functionPUSH5()
-{
-  push4Time = millis();
-  if ((push4Time - push4LastTime > DEBOUNCE_TIME) && alive)
-  {
-    // do low power mode stuff
-  }
-  push4LastTime = push4Time;
-}
 

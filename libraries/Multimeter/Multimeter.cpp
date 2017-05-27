@@ -39,10 +39,10 @@ Multimeter::Multimeter(ScreenPins_t screen_pins, SamplerPins_t sampler_pins, Mis
     sampler(sampler_pins.gain_low_pin, sampler_pins.gain_mid_pin,
             sampler_pins.gain_high_pin, sampler_pins.small_resistor_pin,
             sampler_pins.big_resistor_pin, sampler_pins.ohmmeter_pin,
-            sampler_pins.ampmeter_pin, sampler_pins.neg_pin,
-            sampler_pins.peizo_pin),
+            sampler_pins.ampmeter_pin, sampler_pins.neg_pin),
     sampleLedPin(misc_pins.sample_led_pin),
-    statusLedPin(misc_pins.status_led_pin)
+    statusLedPin(misc_pins.status_led_pin),
+    buzzerPin(misc_pins.buzzer_pin)
 //    logger(misc_pins.logger_cs_pin)
 {
 }
@@ -51,21 +51,23 @@ void Multimeter::begin(uint8_t default_sample_mode, uint8_t default_sample_perio
 {
     pinMode(sampleLedPin, OUTPUT);
     pinMode(statusLedPin, OUTPUT);
+    pinMode(buzzerPin, OUTPUT);
 
     samplerSemaphore.begin();
     screenSemaphore.begin();
     loggerSemaphore.begin();
 
-    sample_period = default_sample_period;
+    sampleMode = default_sample_mode;
+    samplePeriod = default_sample_period;
     
     samplerSemaphore.waitFor();
-    sampler.begin(default_sample_mode);
+    sampler.begin();
     samplerSemaphore.post();
 
     screenSemaphore.waitFor();
     screen.begin(default_brightness);
-    screen.displaySampleMode(sampler.getSampleMode());
-    screen.displaySampleRate(sample_period);
+    screen.displaySampleMode(sampleMode);
+    screen.displaySampleRate(samplePeriod);
     screenSemaphore.post();
 
     serialTxMailbox.begin(10);
@@ -73,23 +75,21 @@ void Multimeter::begin(uint8_t default_sample_mode, uint8_t default_sample_perio
 
 void Multimeter::buttonPressed(uint32_t button_event)
 {
-    switch(logging_state) {
+    switch(loggingState) {
         case NOT_LOGGING:
             switch(button_event) {
                 case SAMPLE_MODE_BUTTON_PRESS:
-                    samplerSemaphore.waitFor();
-                    sampler.incrementSampleMode();
-                    samplerSemaphore.post();
+                    sampleMode = nextSampleMode(sampleMode);
 
                     screenSemaphore.waitFor();
-                    screen.displaySampleMode(sampler.getSampleMode());
+                    screen.displaySampleMode(sampleMode);
                     screenSemaphore.post();
                     break;
                 case SAMPLE_RATE_BUTTON_PRESS:
-                    sample_period = nextSamplePeriod(sample_period);
+                    samplePeriod = nextSamplePeriod(samplePeriod);
 
                     screenSemaphore.waitFor();
-                    screen.displaySampleRate(sample_period);
+                    screen.displaySampleRate(samplePeriod);
                     screenSemaphore.post();
                     break;
                 case BRIGHTNESS_BUTTON_PRESS:
@@ -98,9 +98,9 @@ void Multimeter::buttonPressed(uint32_t button_event)
                     screenSemaphore.post();
                     break;
                 case LOGGING_BUTTON_PRESS:
-                    logging_state = LOGGING_INPUT;
+                    loggingState = LOGGING_INPUT;
                     screenSemaphore.waitFor();
-                    screen.setLoggingConfigMode(sampler.getSampleMode(), sample_period);
+                    screen.setLoggingConfigMode(sampleMode, samplePeriod);
                     screenSemaphore.post();
                     break;
             }
@@ -114,14 +114,14 @@ void Multimeter::buttonPressed(uint32_t button_event)
                 case PLUS_1_INPUT:
                     break;
                 case LOGGING_BUTTON_PRESS:
-                    logging_state = LOGGING_ACTIVE;
+                    loggingState = LOGGING_ACTIVE;
                     break;
             }
             break;
         case LOGGING_ACTIVE:
             switch(button_event) {
                 case LOGGING_BUTTON_PRESS:
-                    logging_state = NOT_LOGGING;
+                    loggingState = NOT_LOGGING;
                     break;
             }
             break;
@@ -133,12 +133,10 @@ void Multimeter::instructionReceived(Instruction_t instruction)
     switch(instruction.type)
     {
         case SAMPLE_MODE:
-            samplerSemaphore.waitFor();
-            sampler.setSampleMode(instruction.value);
-            samplerSemaphore.post();
+            sampleMode = instruction.value;
             break;
         case SAMPLE_RATE:
-            sample_period = instruction.value;
+            samplePeriod = instruction.value;
             break;
         case BRIGHTNESS:
             screenSemaphore.waitFor();
@@ -160,7 +158,7 @@ void Multimeter::sample()
 {
     digitalWrite(sampleLedPin, HIGH);
     samplerSemaphore.waitFor();
-    TypedSample_t new_sample = sampler.sample();
+    TypedSample_t new_sample = sampler.sample(sampleMode);
     samplerSemaphore.post();
 
     screenSemaphore.waitFor();
@@ -177,9 +175,14 @@ uint8_t Multimeter::nextSamplePeriod(uint8_t current_period)
     return (current_period + 1) % 9;
 }
 
+uint8_t Multimeter::nextSampleMode(uint8_t current_mode)
+{
+    return (current_mode + 1) % 7;
+}
+
 unsigned long Multimeter::getSamplePeriodMillis()
 {
-    return sample_period_millis[sample_period];
+    return sample_period_millis[samplePeriod];
 }
 
 bool Multimeter::samplesAvailable()

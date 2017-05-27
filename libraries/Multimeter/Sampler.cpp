@@ -17,7 +17,7 @@
 
 Sampler::Sampler(const uint8_t low_gain_pin, const uint8_t mid_gain_pin, const uint8_t high_gain_pin,
                 const uint8_t small_resistor_pin, const uint8_t big_resistor_pin, const uint8_t ohmmeter_pin,
-                const uint8_t ampmeter_pin, const uint8_t neg_pin, const uint8_t peizo_pin) :
+                const uint8_t ampmeter_pin, const uint8_t neg_pin) :
   adc(),
   lowGainPin(low_gain_pin),
   midGainPin(mid_gain_pin),
@@ -27,30 +27,26 @@ Sampler::Sampler(const uint8_t low_gain_pin, const uint8_t mid_gain_pin, const u
   ohmmeterPin(ohmmeter_pin),
   ampmeterPin(ampmeter_pin),
   negPin(neg_pin),
-  peizoPin(peizo_pin),
-  ampState(LOW_GAIN)
+  ampState(MIN_GAIN)
 {
 }
 
-void Sampler::begin(uint8_t sample_mode)
+void Sampler::begin()
 {
-  pinMode(peizoPin, OUTPUT);
   pinMode(negPin, INPUT_PULLUP);
   
   pinMode(lowGainPin, OUTPUT);
   pinMode(midGainPin, OUTPUT);
   pinMode(highGainPin, OUTPUT);
-  setAmpState(MIN_GAIN);
+  setAmplifierState(MIN_GAIN);
 
   pinMode(smallResistorPin, OUTPUT);
   pinMode(bigResistorPin, OUTPUT);
   pinMode(ohmmeterPin, OUTPUT);
+  setOhmmeterState(OHMMETER_OFF);
+
   pinMode(ampmeterPin, OUTPUT);
-
-  sampleMode = sample_mode;
-  setSampleMode(sampleMode);
-
-  tone(peizoPin, 2000);
+  setAmpmeterState(AMPMETER_OFF);
 
   configureADC();
 }
@@ -58,42 +54,15 @@ void Sampler::begin(uint8_t sample_mode)
 void Sampler::configureADC()
 {
   adc.begin();
-  //adc.rate080sps();
   adc.pgaDisable();
+  adc.rate080sps();
 }
 
-void Sampler::setSampleMode(uint8_t sample_mode)
+void Sampler::disableAllModes()
 {
-  sampleMode = sample_mode;
-  setAmpState(MIN_GAIN);
+  setAmplifierState(MIN_GAIN);
   setOhmmeterState(OHMMETER_OFF);
-  switch(sampleMode) {
-    case DC_VOLTAGE:
-    case AC_VOLTAGE:
-      digitalWrite(ampmeterPin, HIGH);
-      break;
-    case DC_CURRENT:
-    case AC_CURRENT:
-      digitalWrite(ampmeterPin, LOW);
-      break;
-    case RESISTANCE:
-      digitalWrite(ampmeterPin, HIGH);
-      break;
-    case CONTINUITY:
-      break;
-    case LOGIC:
-      break;
-  }
-}
-
-uint8_t Sampler::getSampleMode()
-{
-  return sampleMode;
-}
-
-void Sampler::incrementSampleMode()
-{
-  setSampleMode((getSampleMode() + 1) % 7);
+  setAmpmeterState(AMPMETER_OFF);
 }
 
 float Sampler::getADCmV()
@@ -103,35 +72,40 @@ float Sampler::getADCmV()
   return (3.3/(float)16777216)*val;
 }
 
-TypedSample_t Sampler::sample()
+TypedSample_t Sampler::sample(uint8_t type)
 {
-  switch (sampleMode) {
+  TypedSample_t sample;
+  sample.value.floatRep = NAN;
+  sample.type = type;
+
+  switch (type) {
     case DC_VOLTAGE:
-      return getDCVoltage();
+      sample = getDCVoltage();
     case AC_VOLTAGE:
-      return getACVoltage();
+      sample = getACVoltage();
     case DC_CURRENT:
-      return getDCCurrent();
+      sample = getDCCurrent();
     case AC_CURRENT:
-      return getACCurrent();
+      sample = getACCurrent();
     case RESISTANCE:
-      return getResistance();
+      sample = getResistance();
     case CONTINUITY:
-      return getContinuity();
+      sample = getContinuity();
     case LOGIC:
-      return getLogic();
+      sample = getLogic();
   }
-  TypedSample_t default_sample;
-  default_sample.value.floatRep = NAN;
-  return default_sample;
+
+  return sample;
 }
 
 TypedSample_t Sampler::getDCVoltage()
 {
   uint8_t last_amp_state;
   TypedSample_t sample;
-  sample.type = DC_VOLTAGE;
-  setAmpState(LOW_GAIN);
+  sample.resolution = ampState;
+  sample.value.floatRep = getADCmV();
+  return sample;
+  setAmplifierState(LOW_GAIN);
 
   do {
     last_amp_state = ampState;
@@ -140,28 +114,28 @@ TypedSample_t Sampler::getDCVoltage()
     switch(ampState) {
       case LOW_GAIN:
         if (sample.value.floatRep < 4.75) {
-          setAmpState(MID_GAIN);
+          setAmplifierState(MID_GAIN);
         } else if (sample.value.floatRep > 12) {
           sample.value.floatRep = NAN;
         }
         break;
       case MID_GAIN:
         if (sample.value.floatRep > 5) {
-          setAmpState(LOW_GAIN);
+          setAmplifierState(LOW_GAIN);
         } else if (sample.value.floatRep < 0.9) {
-          setAmpState(HIGH_GAIN);
+          setAmplifierState(HIGH_GAIN);
         }
         break;
       case HIGH_GAIN:
         if (sample.value.floatRep > 1) {
-          setAmpState(MID_GAIN);
+          setAmplifierState(MID_GAIN);
         }
         break;
     }
   } while((last_amp_state != ampState));
 
   sample.resolution = ampState;
-  setAmpState(MIN_GAIN);
+  disableAllModes();
   return sample;
 }
 
@@ -169,8 +143,7 @@ TypedSample_t Sampler::getACVoltage()
 {
   uint8_t last_amp_state;
   TypedSample_t sample;
-  sample.type = AC_VOLTAGE;
-  setAmpState(LOW_GAIN);
+  setAmplifierState(LOW_GAIN);
 
   do {
     last_amp_state = ampState;
@@ -179,28 +152,28 @@ TypedSample_t Sampler::getACVoltage()
     switch(ampState) {
       case LOW_GAIN:
         if (sample.value.floatRep < 4.75) {
-          setAmpState(MID_GAIN);
+          setAmplifierState(MID_GAIN);
         } else if (sample.value.floatRep > 12) {
           sample.value.floatRep = NAN;
         }
         break;
       case MID_GAIN:
         if (sample.value.floatRep > 5) {
-          setAmpState(LOW_GAIN);
+          setAmplifierState(LOW_GAIN);
         } else if (sample.value.floatRep < 0.9) {
-          setAmpState(HIGH_GAIN);
+          setAmplifierState(HIGH_GAIN);
         }
         break;
       case HIGH_GAIN:
         if (sample.value.floatRep > 1) {
-          setAmpState(MID_GAIN);
+          setAmplifierState(MID_GAIN);
         }
         break;
     }
   } while((last_amp_state != ampState));
 
   sample.resolution = ampState;
-  setAmpState(MIN_GAIN);
+  disableAllModes();
   return sample;
 }
 
@@ -208,8 +181,7 @@ TypedSample_t Sampler::getDCCurrent()
 {
   uint8_t last_amp_state;
   TypedSample_t sample;
-  sample.type = DC_CURRENT;
-  setAmpState(MID_GAIN);
+  setAmplifierState(MID_GAIN);
 
   do {
     last_amp_state = ampState;
@@ -220,19 +192,19 @@ TypedSample_t Sampler::getDCCurrent()
         if (sample.value.floatRep > 200) {
           sample.value.floatRep = NAN;
         } else if (sample.value.floatRep < 9.5) {
-          setAmpState(HIGH_GAIN);
+          setAmplifierState(HIGH_GAIN);
         }
         break;
       case HIGH_GAIN:
         if (sample.value.floatRep > 10) {
-          setAmpState(MID_GAIN);
+          setAmplifierState(MID_GAIN);
         }
         break;
     }
   } while((last_amp_state != ampState));
 
   sample.resolution = ampState;
-  setAmpState(MIN_GAIN);
+  disableAllModes();
   return sample;
 }
 
@@ -240,8 +212,7 @@ TypedSample_t Sampler::getACCurrent()
 {
   uint8_t last_amp_state;
   TypedSample_t sample;
-  sample.type = AC_CURRENT;
-  setAmpState(MID_GAIN);
+  setAmplifierState(MID_GAIN);
 
   do {
     last_amp_state = ampState;
@@ -252,19 +223,19 @@ TypedSample_t Sampler::getACCurrent()
         if (sample.value.floatRep > 200) {
           sample.value.floatRep = NAN;
         } else if (sample.value.floatRep < 9.5) {
-          setAmpState(HIGH_GAIN);
+          setAmplifierState(HIGH_GAIN);
         }
         break;
       case HIGH_GAIN:
         if (sample.value.floatRep > 10) {
-          setAmpState(MID_GAIN);
+          setAmplifierState(MID_GAIN);
         }
         break;
     }
   } while((last_amp_state != ampState));
 
   sample.resolution = ampState;
-  setAmpState(MIN_GAIN);
+  disableAllModes();
   return sample;
 }
 
@@ -272,8 +243,7 @@ TypedSample_t Sampler::getResistance()
 {
   uint8_t last_ohmmeter_state;
   TypedSample_t sample;
-  sample.type = RESISTANCE;
-  setAmpState(HIGH_GAIN);
+  setAmplifierState(HIGH_GAIN);
   setOhmmeterState(BIG_RESISTOR);
 
   do {
@@ -295,15 +265,12 @@ TypedSample_t Sampler::getResistance()
   } while((last_ohmmeter_state != ohmmeterState));
 
   sample.resolution = ohmmeterState;
-  setOhmmeterState(OHMMETER_OFF);
-  setAmpState(MIN_GAIN);
+  disableAllModes();
   return sample;
 }
 
 TypedSample_t Sampler::getContinuity() {
-  TypedSample_t sample = getResistance();
-  sample.type = CONTINUITY;
-  return sample;
+  return getResistance();
 }
 
 TypedSample_t Sampler::getLogic() {
@@ -394,7 +361,7 @@ float Sampler::calcResistance(uint8_t ohmeter_state) {
   return -1.0;
 }
 
-void Sampler::setAmpState(uint8_t new_state) {
+void Sampler::setAmplifierState(uint8_t new_state) {
   ampState = new_state;
   switch(ampState) {
     case MIN_GAIN:
@@ -412,7 +379,6 @@ void Sampler::setAmpState(uint8_t new_state) {
       digitalWrite(highGainPin, HIGH);
       break;
     case HIGH_GAIN:
-    default:
       digitalWrite(lowGainPin, HIGH);
       digitalWrite(midGainPin, HIGH);
       digitalWrite(highGainPin, LOW);
@@ -437,6 +403,18 @@ void Sampler::setOhmmeterState(uint8_t new_state) {
       digitalWrite(ohmmeterPin, HIGH);
       digitalWrite(smallResistorPin, HIGH);
       digitalWrite(bigResistorPin, LOW);
+      break;
+  }
+}
+
+void Sampler::setAmpmeterState(uint8_t new_state) 
+{
+  switch(new_state) {
+    case AMPMETER_OFF:
+      digitalWrite(ampmeterPin, HIGH);
+      break;
+    default:
+      digitalWrite(ampmeterPin, LOW);
       break;
   }
 }

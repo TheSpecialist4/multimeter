@@ -59,12 +59,12 @@ const SamplerPins_t sampler_pins = {.gain_low_pin = 25,
                                     .big_resistor_pin = 24,
                                     .ohmmeter_pin = 8,
                                     .ampmeter_pin = 30,
-                                    .neg_pin = 29,
-                                    .peizo_pin = 35};
+                                    .neg_pin = 29};
 
 const MiscPins_t misc_pins = {.sample_led_pin = GREEN_LED, // 5
                               .status_led_pin = RED_LED,  // 6
-                              .logger_cs_pin = 18};
+                              .logger_cs_pin = 18,
+                              .buzzer_pin = 35};
 
 
 Multimeter multimeter(screen_pins, sampler_pins, misc_pins);

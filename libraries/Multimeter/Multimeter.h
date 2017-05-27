@@ -53,13 +53,13 @@ typedef struct SamplerPins_t {
     uint8_t ohmmeter_pin;
     uint8_t ampmeter_pin;
     uint8_t neg_pin;
-    uint8_t peizo_pin;
 };
 
 typedef struct MiscPins_t {
     uint8_t sample_led_pin;
     uint8_t status_led_pin;
     uint8_t logger_cs_pin;
+    uint8_t buzzer_pin;
 };
 
 class Multimeter
@@ -80,11 +80,14 @@ class Multimeter
 
     const uint8_t sampleLedPin;
     const uint8_t statusLedPin;
+    const uint8_t buzzerPin;
 
-    uint8_t sample_period;
-    uint8_t logging_state;
+    uint8_t sampleMode;
+    uint8_t samplePeriod;
+    uint8_t loggingState;
 
     uint8_t nextSamplePeriod(uint8_t current_period);
+    uint8_t nextSampleMode(uint8_t current_mode);
 
   public:
     ///
