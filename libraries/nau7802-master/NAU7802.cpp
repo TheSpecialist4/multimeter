@@ -104,29 +104,29 @@ void NAU7802::selectTemp(){
 //Set Sampling rate
 //================
 void NAU7802::rate010sps(){
-  clearBit(NAU7802_CTRL2, 4);
-  clearBit(NAU7802_CTRL2, 5);
-  clearBit(NAU7802_CTRL2, 6);
+  uint8_t val = 0x00;
+  val |= (read(NAU7802_CTRL2) & 0x8f);
+  write(NAU7802_CTRL2, val);
 }
 void NAU7802::rate020sps(){
-  clearBit(NAU7802_CTRL2, 4);
-  clearBit(NAU7802_CTRL2, 5);
-  writeBit(NAU7802_CTRL2, 6);
+  uint8_t val = 0x10;
+  val |= (read(NAU7802_CTRL2) & 0x8f);
+  write(NAU7802_CTRL2, val);
 }
 void NAU7802::rate040sps(){
-  clearBit(NAU7802_CTRL2, 4);
-  writeBit(NAU7802_CTRL2, 5);
-  clearBit(NAU7802_CTRL2, 6);
+  uint8_t val = 0x20;
+  val |= (read(NAU7802_CTRL2) & 0x8f);
+  write(NAU7802_CTRL2, val);
 }
 void NAU7802::rate080sps(){
-  clearBit(NAU7802_CTRL2, 4);
-  writeBit(NAU7802_CTRL2, 5);
-  writeBit(NAU7802_CTRL2, 6);
+  uint8_t val = 0x30;
+  val |= (read(NAU7802_CTRL2) & 0x8f);
+  write(NAU7802_CTRL2, val);
 }
 void NAU7802::rate320sps(){
-  writeBit(NAU7802_CTRL2, 4);
-  writeBit(NAU7802_CTRL2, 5);
-  writeBit(NAU7802_CTRL2, 6);
+  uint8_t val = 0x70;
+  val |= (read(NAU7802_CTRL2) & 0x8f);
+  write(NAU7802_CTRL2, val);
 }
 
 //Set Pre-Gain Amplifier

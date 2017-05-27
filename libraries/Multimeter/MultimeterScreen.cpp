@@ -70,14 +70,14 @@ void MultimeterScreen::displaySample(TypedSample_t sample)
       lcd.write(OHM);
       break;
     case CONTINUITY:
-      if (sample.value.floatRep > 1) {
+      if (sample.value.floatRep < 5.0) {
         lcd.write("CONNECTED");
       } else {
         lcd.write("DISCONNECTED");
       }
       break;
     case LOGIC:
-      if (sample.value.floatRep > 1) {
+      if (sample.value.floatRep > 1.0) {
         lcd.write("ON");
       } else {
         lcd.write("OFF");

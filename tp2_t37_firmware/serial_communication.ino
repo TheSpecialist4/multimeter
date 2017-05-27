@@ -72,7 +72,7 @@ void loop_serial_communication()
 //    Serial1.write((tx_sample.sample.byteRep >> 16) & 0xff);
 //    Serial1.write((tx_sample.sample.byteRep >> 24) & 0xff);
 //    Serial1.write((byte) 0x00);
-    Serial1.println(1);
+    //Serial.println(tx_sample.value.floatRep);
     //Serial.println("sample");
   }
   

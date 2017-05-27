@@ -161,6 +161,9 @@ void Multimeter::sample()
     TypedSample_t new_sample = sampler.sample(sampleMode);
     samplerSemaphore.post();
 
+    Serial.println(new_sample.value.floatRep);
+    Serial.println(new_sample.type);
+    Serial.println(sampleMode);
     screenSemaphore.waitFor();
     screen.displaySample(new_sample);
     screenSemaphore.post();

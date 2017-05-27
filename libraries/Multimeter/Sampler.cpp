@@ -54,8 +54,8 @@ void Sampler::begin()
 void Sampler::configureADC()
 {
   adc.begin();
-  adc.pgaDisable();
-  adc.rate080sps();
+  //adc.pgaDisable();
+  adc.rate320sps();
 }
 
 void Sampler::disableAllModes()
@@ -68,7 +68,6 @@ void Sampler::disableAllModes()
 float Sampler::getADCmV()
 {
   uint32_t val = adc.readRawADC();
-  Serial.println(val);
   return (3.3/(float)16777216)*val;
 }
 
@@ -77,22 +76,29 @@ TypedSample_t Sampler::sample(uint8_t type)
   TypedSample_t sample;
   sample.value.floatRep = NAN;
   sample.type = type;
-
+  
   switch (type) {
     case DC_VOLTAGE:
       sample = getDCVoltage();
+      break;
     case AC_VOLTAGE:
       sample = getACVoltage();
+      break;
     case DC_CURRENT:
       sample = getDCCurrent();
+      break;
     case AC_CURRENT:
       sample = getACCurrent();
+      break;
     case RESISTANCE:
       sample = getResistance();
+      break;
     case CONTINUITY:
       sample = getContinuity();
+      break;
     case LOGIC:
       sample = getLogic();
+      break;
   }
 
   return sample;
