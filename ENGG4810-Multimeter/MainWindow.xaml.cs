@@ -291,12 +291,20 @@ namespace ENGG4810_Multimeter
 
         private void btnLoadMaskFile_Click(object sender, RoutedEventArgs e)
         {
-            vm.TestMask();
+            if (!vm.LoadMaskFile())
+            {
+                BeginStoryboard(this.FindResource("ShowFileErrorStoryboard") as Storyboard);
+            }
         }
 
         private void chart_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             
+        }
+
+        private void btnRefreshMask_Click(object sender, RoutedEventArgs e)
+        {
+            vm.TestMask();
         }
     }
 }

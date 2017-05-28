@@ -186,8 +186,8 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <StackPanel x:Name="stackPanelError" Orientation="Horizontal" HorizontalAlignment="Center" Height="0">
-            <TextBlock Text="Error in file format" FontSize="16" Margin="5,5,15,5" FontWeight="Light" Foreground="#FFAA3226" />
-            <Button Template="{StaticResource AllButtonsTemplate}" Content="Dismiss">
+            <TextBlock Text="Error in file format" FontSize="18" Margin="5,5,15,5" FontWeight="Light" Foreground="#FFAA3226" />
+            <Button Template="{StaticResource AllButtonsTemplate}" Content="Dismiss" Width="65" FontSize="13">
                 <Button.Triggers>
                     <EventTrigger RoutedEvent="Button.Click">
                         <BeginStoryboard>
@@ -385,8 +385,16 @@
                                 Template="{StaticResource AllButtonsTemplate}" FontSize="14"
                                 Click="btnLoadMaskFile_Click"/>
                         <StackPanel Margin="80,0,0,0" HorizontalAlignment="Stretch">
-                            <Label Content="Fail Intervals" Margin="0,5,0,0" FontSize="20" FontWeight="Light"/>
-                            <TextBox ScrollViewer.VerticalScrollBarVisibility="Auto" Text="{Binding MaskText}" Margin="5,0,0,0" Height="100" BorderBrush="LightGray"
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Fail Intervals" Margin="0,5,0,0" FontSize="18" FontWeight="Light"/>
+                                <Button Name="btnRefreshMask" Content="&#xE72C;" FontFamily="Segoe MDL2 Assets" 
+                                    Template="{StaticResource MaskButtonsTemplate}"
+                                    FontSize="18" Height="30" Width="30" Background="Transparent"
+                                    Margin="0,10,0,0" Foreground="Green"
+                                    HorizontalAlignment="Left" Click="btnRefreshMask_Click"/>
+                            </StackPanel>
+                            <TextBox ScrollViewer.VerticalScrollBarVisibility="Auto" Text="{Binding MaskText}" Margin="5,0,0,0" 
+                                     Height="80" BorderBrush="LightGray"
                                      IsReadOnly="True" TextWrapping="Wrap" FontSize="14"/>
                         </StackPanel>
                     </StackPanel>

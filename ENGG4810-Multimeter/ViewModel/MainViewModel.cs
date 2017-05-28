@@ -156,8 +156,6 @@ namespace ENGG4810_Multimeter.ViewModel
         public string[] Labels { get; set; }
         public Func<double, string> YFormatter { get; set; }
 
-        private Random random = new Random();
-
         public SerialFacade SerialHandler { get; set; }
 
         private string _maskText;
@@ -204,8 +202,6 @@ namespace ENGG4810_Multimeter.ViewModel
                     LineSmoothness = 0.5 //straight lines, 1 really smooth lines
                 },
             };
-
-            //SetUpSerial();
         }
 
         public void SetUpSerial()
@@ -214,7 +210,6 @@ namespace ENGG4810_Multimeter.ViewModel
             SerialHandler.IncomingData.CollectionChanged += SerialIncomingData_CollectionChanged;
 
             IsSerialWorking = SerialHandler.SetupConnection();
-            //IsSerialWorking = true;
         }
 
         private void SerialIncomingData_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -256,16 +251,6 @@ namespace ENGG4810_Multimeter.ViewModel
             //}
         }
 
-        //public void SwitchMode()
-        //{
-        //    SeriesCollection[0].Values.Clear();
-        //    Value = "0";
-        //    if (IsModeConnected)
-        //    {
-        //        SerialHandler.ClosePort();
-        //    }
-        //}
-
         public void SwitchToDisconnected()
         {
             IsModeConnected = false;
@@ -289,17 +274,6 @@ namespace ENGG4810_Multimeter.ViewModel
                         StrokeThickness = 0.5
                     });
             }
-            //SeriesCollection[1].Values.Add(2.0);
-            //SeriesCollection[2].Values.Add(6.0);
-
-            //SeriesCollection[1].Values.Add(3.0);
-            //SeriesCollection[2].Values.Add(10.0);
-
-            //SeriesCollection[1].Values.Add(1.0);
-            //SeriesCollection[2].Values.Add(8.0);
-
-            //SeriesCollection[1].Values.Add(2.0);
-            //SeriesCollection[2].Values.Add(7.0);
         }
 
         public void SwitchToConnected()
@@ -356,9 +330,44 @@ namespace ENGG4810_Multimeter.ViewModel
             openFileDialog.ShowDialog();
         }
 
-        private void OpenFileDialog_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
+        public bool LoadMaskFile()
         {
-            throw new NotImplementedException();
+            var openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "CSV File (*.csv)|*.csv";
+            var fileName = "";
+            openFileDialog.FileOk += (s, e) =>
+            {
+                fileName = openFileDialog.FileName;
+            };
+            openFileDialog.ShowDialog();
+            if (!fileName.Equals(""))
+            {
+                return LoadMaskFileData(fileName);
+            }
+            return true;
+        }
+
+        private bool LoadMaskFileData(string fileName)
+        {
+            string[] lines = File.ReadAllText(fileName).Split('\n');
+            foreach (var line in lines)
+            {
+                Debug.WriteLine("line: " + line);
+                string[] tokens = line.Split(',');
+                if (tokens.Length != 4) { Debug.WriteLine("length error"); return false; }
+                tokens[3] = tokens[3].Replace('\n', ' ');
+                tokens[3] = tokens[3].Trim();
+                if (Unit != tokens[3]) { Debug.WriteLine("unit error" + tokens[3] + Unit); return false; }
+                if (tokens[0].Equals("high"))
+                {
+                    AddToHigh(tokens[1], tokens[2]);
+                } else if (tokens[0].Equals("low"))
+                {
+                    AddToLow(tokens[1], tokens[2]);
+                } else { Debug.WriteLine("high/low error"); return false; }
+            }
+            TestMask();
+            return true;
         }
 
         private void LoadFileData()
