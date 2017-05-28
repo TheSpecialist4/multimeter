@@ -243,6 +243,28 @@ namespace ENGG4810_Multimeter.ViewModel
 
         private DateTime startTime;
 
+        private string _brightnessValue;
+        public string BrightnessValue
+        {
+            get { return _brightnessValue; }
+            set {
+                if (_brightnessValue == value) return;
+                _brightnessValue = value;
+                RaisePropertyChanged("BrightnessValue");
+            }
+        }
+
+        private int _modeIndex;
+        public int ModeIndex
+        {
+            get { return _modeIndex; }
+            set {
+                if (_modeIndex == value) return;
+                _modeIndex = value;
+                RaisePropertyChanged("ModeIndex");
+            }
+        }
+
         //temp variables
         private double dataX = 0;
 
@@ -256,7 +278,9 @@ namespace ENGG4810_Multimeter.ViewModel
 
             Value = "0";
             Unit = "V";
-            DataType = "Voltage: ";
+            DataType = "Voltage(DC): ";
+
+            ModeIndex = 0;
 
             XAxisMin = 0;
             XAxisMax = 10;
@@ -284,6 +308,7 @@ namespace ENGG4810_Multimeter.ViewModel
         public bool SetUpSerial()
         {
             SerialHandler = SerialFacade.GetInstance();
+            SerialHandler.SetVM(this);
             SerialHandler.IncomingData.CollectionChanged += SerialIncomingData_CollectionChanged;
 
             IsSerialWorking = SerialHandler.SetupConnection();
@@ -298,26 +323,112 @@ namespace ENGG4810_Multimeter.ViewModel
                 if (SeriesCollection[0].Values.Count == 0)
                 {
                     startTime = DateTime.UtcNow;
-                    startTimeString = startTime.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffffffzzz");
+                    startTimeString = startTime.ToString("yyyy-MM-ddTHH\\:mm\\:ss.ff");
                 }
-                endTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffffffzzz");
+                endTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH\\:mm\\:ss.ff");
                 Timestamp = startTimeString + "/" + endTime;
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
                 {
                     for (int i = SeriesCollection[0].Values.Count; i < SerialHandler.IncomingData.Count; i++)
                     {
                         double value = double.Parse(SerialHandler.IncomingData[i]);
-                        SeriesCollection[0].Values.Add(value);
+                        if (Unit == "V" || Unit == "A")
+                        {
+                            value = value / 1000.0;
+                        }
+                        if (value != Double.NaN)
+                        {
+                            SeriesCollection[0].Values.Add(new ObservablePoint { X = dataX++, Y = value });
+                        }
                         if (SeriesCollection[0].Values.Count > 10)
                         {
                             XAxisMin++;
                             XAxisMax++;
                         }
-                        Value = value.ToString();
-                        Debug.WriteLine(value + " added to graph");
+                        Value = Math.Round(value, 4).ToString();
                     }
                 }));
             }
+        }
+
+        public void SwitchDataTypeMode(int mode)
+        {
+            SeriesCollection[0].Values.Clear();
+            dataX = 0;
+            XAxisMax = 10;
+            XAxisMin = 0;
+            switch (mode)
+            {
+                /*
+             *0 - DC V
+            * 1 - AC v
+            * 2 - DC c
+            * 3 - AC c
+            * 4 - Resistance
+            * 5 - Continuity
+            * 6 - LOGIC
+            *
+            **/
+                case 0:
+                    Unit = "V";
+                    DataType = "Voltage(DC): ";
+                    break;
+                case 1:
+                    Unit = "V";
+                    DataType = "Voltage(AC): ";
+                    break;
+                case 2:
+                    Unit = "A";
+                    DataType = "Current(DC): ";
+                    break;
+                case 3:
+                    Unit = "A";
+                    DataType = "Current(AC): ";
+                    break;
+                case 4:
+                    Unit = "ohm";
+                    DataType = "Resistance: ";
+                    break;
+                case 5:
+                    Unit = "";
+                    DataType = "Continuity: ";
+                    break;
+                case 6:
+                    Unit = "";
+                    DataType = "Logic Level: ";
+                    break;
+            }
+            ModeIndex = mode;
+        }
+
+        public bool IncreaseBrightness()
+        {
+            int value = int.Parse(BrightnessValue);
+            if (value < 4)
+            {
+                BrightnessValue = (++value).ToString();
+                if (!SerialHandler.SendBrightnessValue(value))
+                {
+                    MessageBox.Show("Connection lost...switching to disconnected mode");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public bool DecreaseBrightness()
+        {
+            int value = int.Parse(BrightnessValue);
+            if (value > 0)
+            {
+                BrightnessValue = (--value).ToString();
+                if (!SerialHandler.SendBrightnessValue(value))
+                {
+                    MessageBox.Show("Connection lost...switching to disconnected mode");
+                    return false;
+                }
+            }
+            return true;
         }
 
         public void StartContinuousGraph()
@@ -347,6 +458,8 @@ namespace ENGG4810_Multimeter.ViewModel
         {
             IsModeConnected = false;
             SerialHandler.ClosePort();
+            SeriesCollection[0].Values.Clear();
+            SerialHandler.IncomingData.Clear();
             Timestamp = "";
             if (SeriesCollection.Count == 1)
             {
@@ -367,6 +480,7 @@ namespace ENGG4810_Multimeter.ViewModel
                         StrokeThickness = 0.5
                     });
             }
+            dataX = 0;
         }
 
         /// <summary>
@@ -944,6 +1058,11 @@ namespace ENGG4810_Multimeter.ViewModel
                 }
             }
             MaskText = MaskValues.GetMaskText();
+        }
+
+        public bool SendMode(int value)
+        {
+            return SerialHandler.SendMode(value);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ENGG4810_Multimeter.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -25,6 +26,8 @@ namespace ENGG4810_Multimeter
         /// </summary>
         private bool isConnected = false;
 
+        private MainViewModel vm;
+
         /// <summary>
         /// Data received on the port
         /// </summary>
@@ -33,6 +36,11 @@ namespace ENGG4810_Multimeter
         private SerialFacade()
         {
             IncomingData = new ObservableCollection<string>();
+        }
+
+        public void SetVM(MainViewModel vm)
+        {
+            this.vm = vm;
         }
 
         /// <summary>
@@ -90,28 +98,47 @@ namespace ENGG4810_Multimeter
                         port.Write(ack, 0, 1);
                         Task.Factory.StartNew(() =>
                         {
+                            bool isFirst = true;
                             while (this.isConnected && port.IsOpen)
                             {
-                                int counter = 0;
-                                byte checker = 0;
-                                byte[] buffer = new byte[4];
-                                
-                                checker = (byte)port.ReadByte();
-                                while (checker != 0)
+                                try
                                 {
-                                    buffer[counter++] = checker;
-                                    checker = (byte)port.ReadByte();
+                                    timer.Start();
+                                    int firstByte = 0;
+                                    firstByte = port.ReadByte();
+                                    if (firstByte <= 3)
+                                    {
+                                        switch (firstByte)
+                                        {
+                                            case 0:
+                                                //brightness
+                                                vm.BrightnessValue = port.ReadByte().ToString();
+                                                break;
+                                            case 1:
+                                                //sample mode
+                                                vm.SwitchDataTypeMode(port.ReadByte());
+                                                IncomingData.Clear();
+                                                break;
+                                            case 2:
+                                                //sample rate
+                                                //1 byte
+                                                break;
+                                            case 3:
+                                                //value
+                                                port.ReadByte();
+                                                byte[] buffer = new byte[4];
+                                                port.Read(buffer, 0, 4);
+                                                IncomingData.Add(BitConverter.ToSingle(buffer, 0).ToString());
+                                                if (isFirst)
+                                                {
+                                                    port.Write(ack, 0, 1);
+                                                    isFirst = false;
+                                                }
+                                                break;
+                                        }
+                                    }
                                 }
-                                if (counter == 4)
-                                {
-                                    Debug.WriteLine("sending ack for zero");
-                                    buffer[0] = 0xFF;
-                                    port.Write(buffer, 0, 1);
-                                }
-                                counter = 0;
-                                Debug.Write("buffer: " + BitConverter.ToString(buffer));
-                                Debug.WriteLine(" float " + BitConverter.ToSingle(buffer, 0));
-                                IncomingData.Add(BitConverter.ToSingle(buffer, 0).ToString());
+                                catch (Exception) { }
                             }
                         });
                         timer.Close();
@@ -216,6 +243,34 @@ namespace ENGG4810_Multimeter
             {
                 port.Write(buffer, 0, 1);
             }
+        }
+
+        public bool SendBrightnessValue(int value)
+        {
+            try
+            {
+                byte[] buffer = new byte[2];
+                buffer[0] = 0;
+                buffer[1] = (byte)value;
+                port.Write(buffer, 0, 2);
+                return true;
+            } catch(Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool SendMode(int value)
+        {
+            try
+            {
+                byte[] buffer = new byte[2];
+                buffer[0] = 1;
+                buffer[1] = (byte)value;
+                port.Write(buffer, 0, 2);
+                return true;
+            }
+            catch (Exception) { return false; }
         }
     }
 }

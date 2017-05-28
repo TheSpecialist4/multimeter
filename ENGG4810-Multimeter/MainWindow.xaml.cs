@@ -413,5 +413,34 @@ namespace ENGG4810_Multimeter
         {
             vm.TestMask();
         }
+
+        private void btnBrightnessIncrease_Click(object sender, RoutedEventArgs e)
+        {
+            if (!vm.IncreaseBrightness())
+            {
+                SwitchToDisconnectedMode();
+            }
+        }
+
+        private void btnBrightnessDecrease_Click(object sender, RoutedEventArgs e)
+        {
+            if (!vm.DecreaseBrightness())
+            {
+                SwitchToDisconnectedMode();
+            }
+        }
+
+        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (vm == null)
+            {
+                return;
+            }
+            if (!vm.SendMode(listBoxModes.SelectedIndex))
+            {
+                MessageBox.Show("Connection lost...switching to disconnected mode");
+                SwitchToDisconnectedMode();
+            }
+        }
     }
 }

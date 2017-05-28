@@ -453,31 +453,45 @@
                                    TextWrapping="Wrap">
                         <Run Text="{Binding Value}" /><Run Text=" "/><Run Text="{Binding Unit}" FontSize="40" Foreground="#cec629" /></TextBlock>
                     <Separator Margin="5" />
-                    <ListBox SelectionMode="Single" BorderBrush="Transparent" Background="Transparent" Foreground="White">
-                        <ListBoxItem Name="listBoxItemVoltage" IsSelected="True">
-                            <TextBlock Text="Voltage" FontSize="20" Margin="10" />
+                    <ListBox Name="listBoxModes" SelectionMode="Single" BorderBrush="Transparent" Background="Transparent" Foreground="White"
+                             SelectedIndex="{Binding ModeIndex}" SelectionChanged="ListBox_SelectionChanged">
+                        <ListBoxItem Name="listBoxItemVoltageDC">
+                            <TextBlock Text="Voltage (DC)" FontSize="20" Margin="10"/>
                         </ListBoxItem>
-                        <ListBoxItem Name="listBoxItemCurrent">
-                            <TextBlock Text="Current" FontSize="20" Margin="10" />
+                        <ListBoxItem Name="listBoxItemVoltageAC">
+                            <TextBlock Text="Voltage (AC)" FontSize="20" Margin="10" />
+                        </ListBoxItem>
+                        <ListBoxItem Name="listBoxItemCurrentDC">
+                            <TextBlock Text="Current (DC)" FontSize="20" Margin="10" />
+                        </ListBoxItem>
+                        <ListBoxItem Name="listBoxItemCurrentAC">
+                            <TextBlock Text="Current (AC)" FontSize="20" Margin="10" />
                         </ListBoxItem>
                         <ListBoxItem Name="listBoxItemResistance">
                             <TextBlock Text="Resistance" FontSize="20" Margin="10" />
                         </ListBoxItem>
+                        <ListBoxItem Name="listBoxItemContinuity">
+                            <TextBlock Text="Continuity" FontSize="20" Margin="10" />
+                        </ListBoxItem>
+                        <ListBoxItem Name="listBoxItemLogic">
+                            <TextBlock Text="Logic Level" FontSize="20" Margin="10" />
+                        </ListBoxItem>
                     </ListBox>
                     <Separator Margin="5" />
-                    <Button Content="Send Mode" Click="Button_Click" />
+                    <!--<Button Content="Send Mode" Click="Button_Click" />-->
                     <StackPanel Orientation="Horizontal">
                         <Label Content="&#xE706;" FontFamily="Segoe MDL2 Assets" FontSize="22" Foreground="#dbab59"
                                Padding="10,21,0,0"/>
                         <Label Content="Brightness:" Margin="5,10,10,10" FontSize="22" Foreground="#f4e541" FontWeight="Light"/>
+                        <Label Content="{Binding BrightnessValue}" Margin="0,10,5,0" FontSize="22" Foreground="#f4e541" />
                         <Button Name="btnBrightnessIncrease" Content="&#xE70E;" FontFamily="Segoe MDL2 Assets"
                                 Template="{StaticResource AllButtonsTemplate}" Height="30" Width="30"
                                 FontSize="18" Background="Transparent" Foreground="#41c7f4" Margin="0,5,0,0"
-                                ToolTip="Increase LCD brightness"/>
+                                ToolTip="Increase LCD brightness" Click="btnBrightnessIncrease_Click"/>
                         <Button Name="btnBrightnessDecrease" Content="&#xE70D;" FontFamily="Segoe MDL2 Assets"
                                 Template="{StaticResource AllButtonsTemplate}" Height="30" Width="30"
                                 FontSize="18" Background="Transparent" Foreground="#41c7f4" Margin="5,5,0,0"
-                                ToolTip="Decrease LCD brightness"/>
+                                ToolTip="Decrease LCD brightness" Click="btnBrightnessDecrease_Click"/>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>
