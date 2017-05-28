@@ -61,7 +61,7 @@ const SamplerPins_t sampler_pins = {.gain_low_pin = 27,
                                     .ampmeter_pin = 30,
                                     .neg_pin = 29};
 
-const MiscPins_t misc_pins = {.sample_led_pin = GREEN_LED, // 5
+const MiscPins_t misc_pins = {.sample_led_pin = 5, // GREEN_LED
                               .status_led_pin = RED_LED,  // 6
                               .logger_cs_pin = 18,
                               .buzzer_pin = 35};

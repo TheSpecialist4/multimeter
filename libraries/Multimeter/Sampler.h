@@ -68,11 +68,11 @@ class Sampler
     TypedSample_t getContinuity();
     TypedSample_t getLogic();
 
-    float calcDCVoltage(uint8_t amp_state);
-    float calcACVoltage(uint8_t amp_state);
-    float calcDCCurrent(uint8_t amp_state);
-    float calcACCurrent(uint8_t amp_state);
-    float calcResistance(uint8_t ohmeter_state);
+    float calcDCVoltage(float adc_mv_val, uint8_t amp_state);
+    float calcACVoltage(float adc_mv_val, uint8_t amp_state);
+    float calcDCCurrent(float adc_mv_val, uint8_t amp_state);
+    float calcACCurrent(float adc_mv_val, uint8_t amp_state);
+    float calcResistance(float adc_mv_val, uint8_t ohmeter_state);
 
     int sign();
 

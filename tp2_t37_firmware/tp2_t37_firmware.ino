@@ -14,7 +14,10 @@
 
 #define DEBOUNCE_TIME 100
 
-// Prototypes
+#define BUTTON_1  40  //PUSH1
+#define BUTTON_2  39  //PUSH2
+#define BUTTON_3  38
+#define BUTTON_4  37
 
 // Define variables and constants
 
@@ -40,11 +43,17 @@ void setup()
   rtosSetup();
   buttonPressEvent.begin();
 
-  pinMode(PUSH1, INPUT_PULLUP);
-  attachInterrupt(PUSH1, functionPUSH1, FALLING);
+  pinMode(BUTTON_1, INPUT);
+  attachInterrupt(BUTTON_1, functionPUSH1, FALLING);
 
-  pinMode(PUSH2, INPUT_PULLUP);
-  attachInterrupt(PUSH2, functionPUSH2, FALLING);
+  pinMode(BUTTON_2, INPUT);
+  attachInterrupt(BUTTON_2, functionPUSH2, FALLING);
+
+  pinMode(BUTTON_3, INPUT);
+  attachInterrupt(BUTTON_3, functionPUSH3, FALLING);
+
+  pinMode(BUTTON_4, INPUT);
+  attachInterrupt(BUTTON_4, functionPUSH4, FALLING);
 
   alive = true;
 }

@@ -158,6 +158,7 @@ void Multimeter::instructionReceived(Instruction_t instruction)
 
 void Multimeter::sample()
 {
+    digitalWrite(statusLedPin, HIGH);
     digitalWrite(sampleLedPin, HIGH);
     samplerSemaphore.waitFor();
     TypedSample_t new_sample = sampler.sample(sampleMode);
@@ -169,6 +170,7 @@ void Multimeter::sample()
     if (serialTxMailbox.available() < 10) {
         serialTxMailbox.post(new_sample, BIOS_NO_WAIT);
     }
+    digitalWrite(statusLedPin, LOW);
     digitalWrite(sampleLedPin, LOW);
 }
 
