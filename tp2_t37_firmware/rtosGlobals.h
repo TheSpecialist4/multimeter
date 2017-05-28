@@ -52,9 +52,9 @@ const ScreenPins_t screen_pins = {.rs = 11,
                                   .d7 = 32,
                                   .brightnessPWM = 31};
 
-const SamplerPins_t sampler_pins = {.gain_low_pin = 25,
+const SamplerPins_t sampler_pins = {.gain_low_pin = 27,
                                     .gain_mid_pin = 26,
-                                    .gain_high_pin = 27,
+                                    .gain_high_pin = 25,
                                     .small_resistor_pin = 23,
                                     .big_resistor_pin = 24,
                                     .ohmmeter_pin = 8,
@@ -78,7 +78,7 @@ void rtosSetup()
     serialSemaphore.waitFor();
     Serial.println("rtosSetup");
     serialSemaphore.post();
-
+    
     multimeter.begin(DEFAULT_SAMPLE_MODE, DEFAULT_SAMPLE_PERIOD, DEFAULT_BRIGHTNESS);
     
     serialSemaphore.waitFor();

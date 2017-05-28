@@ -19,30 +19,37 @@
 
 // Include application, user and local libraries
 #include <Energia.h>
-#include "sample_defn.h"
-
-#define SERIAL()    Serial1
+#include "Mailbox.h"
+#include "serial_defn.h"
 
 class SerialComm
 {
   private:
-    uint8_t connected;
-    uint8_t state;
+    enum RxStates {no_rx, type_received, value_receiving};
+
+    bool connected;
+    RxStates rxState;
+
+    Mailbox<Instruction_t> instructionsReceived;
+
+    Instruction_t currentInstruction;
 
   public:
     ///
     /// @brief      Define the serial communication object
     ///
-    SerialComm(uint8_t channel);
+    SerialComm();
 
     ///
     /// @brief
     ///
-    void begin(long baud_rate);
+    void begin();
 
-    void sendSample(Typed_Sample_t sample);
+    void receiveByte(uint8_t byte);
 
-    void 
+    Instruction_t receivedInstruction();
+
+    bool instructionAvailable();
 };
 
 #endif

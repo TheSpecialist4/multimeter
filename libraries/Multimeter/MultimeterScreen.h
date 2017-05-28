@@ -106,13 +106,17 @@ class MultimeterScreen
     };
 
     const uint8_t brightnessPWMPin;
-    char strBuffer[11];
+    char strBuffer[15];
 
     uint8_t brightness;
 
     uint8_t nextBrightness(uint8_t current_brightness);
 
-    void displayResolution(uint8_t resolution);
+    void displayVoltage(TypedSample_t sample);
+    void displayCurrent(TypedSample_t sample);
+    void displayResistance(TypedSample_t sample);
+    void displayContinuity(TypedSample_t sample);
+    void displayLogic(TypedSample_t sample);
 
   public:
     ///

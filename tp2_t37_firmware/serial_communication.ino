@@ -46,19 +46,18 @@
 // Include application, user and local libraries
 #include "rtosGlobals.h"
 #include "serial_defn.h"
+#include "SerialComm.h"
 
 // Prototypes
 
 // Define variables and constants
 TypedSample_t tx_sample;
-char buffer1[20];
-char buffer2[5];
-uint8_t stopByte = 0;
-uint8_t rxbyte = 0;
+SerialComm serial_comms;
 
 // Add setup code
 void setup_serial_communication()
 {
+  serial_comms.begin();
   Serial1.begin(9600);
 }
 
@@ -77,10 +76,9 @@ void loop_serial_communication()
   }
   
   if (Serial1.available() > 0) {
-    serialSemaphore.waitFor();
-    Serial.println("rxed");
-    serialSemaphore.post();
-    rxbyte = Serial1.read();
-    Serial1.write(rxbyte);
+    serial_comms.receiveByte(Serial1.read());
+    if (serial_comms.instructionAvailable()) {
+      multimeter.instructionReceived(serial_comms.receivedInstruction());
+    }
   }
 }
