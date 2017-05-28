@@ -347,6 +347,7 @@ namespace ENGG4810_Multimeter.ViewModel
         {
             IsModeConnected = false;
             SerialHandler.ClosePort();
+            Timestamp = "";
             if (SeriesCollection.Count == 1)
             {
                 SeriesCollection.Add(
@@ -408,6 +409,10 @@ namespace ENGG4810_Multimeter.ViewModel
         private StringBuilder getCsvData()
         {
             var csv = new StringBuilder();
+            csv.Append(startTimeString);
+            csv.Append("/");
+            csv.Append(endTime);
+            csv.Append(",");
             csv.Append(Unit);
             foreach(var value in SeriesCollection[0].Values)
             {
@@ -508,7 +513,19 @@ namespace ENGG4810_Multimeter.ViewModel
         {
             SeriesCollection[0].Values.Clear();
             string[] data = File.ReadAllText(DataFileLocation).Split(',');
-            switch (data[0])
+            string unit = "";
+            bool containsTime = false;
+            if (data[0].Contains("/"))
+            {
+                unit = data[1];
+                Timestamp = data[0];
+                containsTime = true;
+            }
+            else
+            {
+                unit = data[0];
+            }
+            switch (unit)
             {
                 case "A":
                     DataType = "Current: ";
@@ -523,9 +540,15 @@ namespace ENGG4810_Multimeter.ViewModel
                     DataType = "Value: ";
                     break;
             }
-            Unit = data[0];
+            Unit = unit;
             for (int i = 1; i < data.Length; i++)
             {
+                if (containsTime)
+                {
+                    i++;
+                    containsTime = false;
+                    continue;
+                }
                 SeriesCollection[0].Values.Add(new ObservablePoint { X = dataX++, Y = double.Parse(data[i])});
                 Value = data[i];
             }
@@ -538,6 +561,7 @@ namespace ENGG4810_Multimeter.ViewModel
         {
             SeriesCollection[0].Values.Clear();
             Value = "0";
+            Timestamp = "";
         }
 
         /// <summary>
@@ -609,12 +633,13 @@ namespace ENGG4810_Multimeter.ViewModel
         /// <returns>True if point was edited</returns>
         public bool EditLow(string xstring, string ystring)
         {
+            Debug.WriteLine("edit for " + xstring + " " + ystring);
             double x;
             if (double.TryParse(xstring, out x))
             {
                 foreach (ObservablePoint point in SeriesCollection[1].Values)
                 {
-                    if (point.X == maskLowXValue)
+                    if (point.X == x)
                     {
                         double y = 0;
                         if (double.TryParse(ystring, out y))

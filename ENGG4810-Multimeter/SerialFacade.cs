@@ -12,13 +12,22 @@ namespace ENGG4810_Multimeter
 {
     public class SerialFacade : ISerialFacade
     {
+        /// <summary>
+        /// Single instance of the class used throughout the application
+        /// </summary>
         private static SerialFacade INSTANCE;
+        /// <summary>
+        /// The port connected to the hardware device
+        /// </summary>
         private SerialPort port;
+        /// <summary>
+        /// True if the port is connected
+        /// </summary>
         private bool isConnected = false;
 
-        //public bool NewDataReceived { get; set; }
-        //public int NewDataCount { get; set; }
-
+        /// <summary>
+        /// Data received on the port
+        /// </summary>
         public ObservableCollection<string> IncomingData { get; set; }
 
         private SerialFacade()
@@ -26,6 +35,10 @@ namespace ENGG4810_Multimeter
             IncomingData = new ObservableCollection<string>();
         }
 
+        /// <summary>
+        /// Returns the single instance of this class used by the entire application
+        /// </summary>
+        /// <returns></returns>
         public static SerialFacade GetInstance()
         {
             if (INSTANCE == null)
@@ -35,16 +48,28 @@ namespace ENGG4810_Multimeter
             return INSTANCE;
         }
 
+        /// <summary>
+        /// Gets the data received
+        /// </summary>
+        /// <returns></returns>
         public int GetData()
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Send data to the port
+        /// </summary>
+        /// <returns></returns>
         public bool SendData()
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Sets up the serial port.
+        /// </summary>
+        /// <returns>True if connection was established. False otherwise</returns>
         public bool SetupConnection()
         {
             foreach (var portName in GetPortNames())
@@ -103,6 +128,11 @@ namespace ENGG4810_Multimeter
             return false;
         }
 
+        /// <summary>
+        /// timer to quit trying to connect to port
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             if (!isConnected)
@@ -111,6 +141,9 @@ namespace ENGG4810_Multimeter
             }
         }
 
+        /// <summary>
+        /// Close the serial port
+        /// </summary>
         public void ClosePort()
         {
             if (port != null)
@@ -119,6 +152,10 @@ namespace ENGG4810_Multimeter
             }
         }
 
+        /// <summary>
+        /// Open the port
+        /// </summary>
+        /// <returns>True if port was opened</returns>
         public bool OpenPort()
         {
             if (port != null && port.IsOpen)
@@ -129,6 +166,11 @@ namespace ENGG4810_Multimeter
             return SetupConnection();
         }
 
+        /// <summary>
+        /// Data received on the port is appropriately interpreted
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             //var value = port.ReadExisting();
@@ -149,6 +191,10 @@ namespace ENGG4810_Multimeter
             port.Write(ack, 0, 1);
         }
 
+        /// <summary>
+        /// Returns a list of all the port names on the machine
+        /// </summary>
+        /// <returns></returns>
         private List<string> GetPortNames()
         {
             List<string> ports = new List<string>();
@@ -159,6 +205,9 @@ namespace ENGG4810_Multimeter
             return ports;
         }
 
+        /// <summary>
+        /// Sends zero to the port
+        /// </summary>
         public void SendZero()
         {
             byte[] buffer = new byte[1];

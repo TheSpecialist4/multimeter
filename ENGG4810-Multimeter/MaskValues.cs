@@ -9,33 +9,25 @@ namespace ENGG4810_Multimeter
 {
     public class MaskValues
     {
+        /// <summary>
+        /// list of all the intervals where the data fails
+        /// </summary>
         private static List<MaskValue> Values = new List<MaskValue>();
 
+        /// <summary>
+        /// Add an interval to mask
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
         public static void AddToMask(double start, double end)
         {
-            //Debug.Write("values: ");
-            //foreach (var value in Values)
-            //{
-            //    Debug.Write($"({value.Start}, {value.End}) ");
-            //}
-            //Debug.WriteLine("");
-            //Debug.WriteLine($"checking for {start}, {end}");
-            //bool found = false;
-            //foreach (var value in Values)
-            //{
-            //   if (value.End <= start)
-            //    {
-            //        value.End = end;
-            //        found = true;
-            //        break;
-            //    }
-            //}
-            //if (!found)
-            //{
-                Values.Add(new MaskValue { Start = start, End = end });
-            //}
+            Values.Add(new MaskValue { Start = start, End = end });
         }
 
+        /// <summary>
+        /// returns the formatted text of all intervals
+        /// </summary>
+        /// <returns>(interval 1)\n(interval 2)...</returns>
         public static string GetMaskText()
         {
             StringBuilder text = new StringBuilder();
@@ -47,15 +39,27 @@ namespace ENGG4810_Multimeter
             return text.ToString();
         }
 
+        /// <summary>
+        /// clears all the interval values
+        /// </summary>
         public static void ClearMasks()
         {
             Values.Clear();
         }
     }
 
+    /// <summary>
+    /// Defines an interval
+    /// </summary>
     class MaskValue
     {
+        /// <summary>
+        /// the starting point of the interval
+        /// </summary>
         public double Start { get; set; }
+        /// <summary>
+        /// ending point of the interval
+        /// </summary>
         public double End { get; set; }
     }
 }
