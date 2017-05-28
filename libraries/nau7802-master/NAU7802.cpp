@@ -48,7 +48,7 @@ void NAU7802::resetSettings(){
   writeBit(NAU7802_PGA_REG, 0);                 //Diasble chopper funcition
   writeBit(NAU7802_PGA_REG, 4);                 //Bypass PGA
 
-  calibrate();                                  //Calibrate
+  selectCh2();
 
   writeBit(NAU7802_I2C_CTRL, NAU7802_SPE);      //Enable Strong Pullup
 
@@ -78,8 +78,8 @@ uint32_t NAU7802::readRawADC(){
   uint32_t adcVal = read24(NAU7802_ADC_B2);
   writeBit(NAU7802_PU_CTRL, NAU7802_CS);
   if(adcVal & 0x00800000){
-    adcVal = (~adcVal+1) & 0x00FFFFFF;
-    // adcVal += 16777216;
+    adcVal = ~adcVal+1;
+    adcVal &= 0x00FFFFFF;
   }
   return adcVal;
 }

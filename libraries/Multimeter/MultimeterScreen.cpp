@@ -47,7 +47,7 @@ void MultimeterScreen::begin(uint8_t default_brightness)
 void MultimeterScreen::displaySample(TypedSample_t sample)
 {
   lcd.setCursor(0, 0);
-  lcd.write("                ");
+  lcd.write("               ");
   lcd.setCursor(0, 0);
   if (sample.value.floatRep == NAN)
   {
@@ -57,88 +57,112 @@ void MultimeterScreen::displaySample(TypedSample_t sample)
   switch(sample.type) {
     case DC_VOLTAGE:
     case AC_VOLTAGE:
-      snprintf(strBuffer, 10, "%fV", sample.value.floatRep);
-      lcd.write(strBuffer);
+      displayVoltage(sample);
       break;
     case DC_CURRENT:
     case AC_CURRENT:
-      snprintf(strBuffer, 10, "%fA", sample.value.floatRep);
+      displayCurrent(sample);
       break;
     case RESISTANCE:
-      snprintf(strBuffer, 10, "%f", sample.value.floatRep);
-      lcd.write(strBuffer);
-      lcd.write(OHM);
+      displayResistance(sample);
       break;
     case CONTINUITY:
-      if (sample.value.floatRep < 5.0) {
-        lcd.write("CONNECTED");
-      } else {
-        lcd.write("DISCONNECTED");
-      }
+      displayContinuity(sample);
       break;
     case LOGIC:
-      if (sample.value.floatRep > 1.0) {
-        lcd.write("ON");
-      } else {
-        lcd.write("OFF");
-      }
+      displayLogic(sample);
       break;
   }
 }
 
-void MultimeterScreen::displayResolution(uint8_t type, uint8_t resolution)
+void MultimeterScreen::displayVoltage(TypedSample_t sample)
 {
-  lcd.setCursor(10, 1);
-  lcd.print("     ");
-  lcd.setCursor(10, 1);
-  switch(type){
-    case DC_VOLTAGE:
-    case AC_VOLTAGE:
-      lcd.print(PLUS_MINUS);
-      switch(resolution) {
-        case 1:
-          lcd.print("12");
-          break;
-        case 2:
-          lcd.print("5");
-          break;
-        case 3:
-          lcd.print("1");
-          break;
-      }
-      lcd.print("V");
+  switch(sample.resolution) {
+    case 3:
+      snprintf(strBuffer, 15, "%fmV", sample.value.floatRep);
+      lcd.setCursor(0, 0);
+      lcd.write(strBuffer);
+      lcd.setCursor(13, 1);
+      lcd.write(PLUS_MINUS);
+      lcd.write("1V");
       break;
-    case DC_CURRENT:
-    case AC_CURRENT:
-      lcd.print(PLUS_MINUS);
-      switch(resolution) {
-        case 2:
-          lcd.print("200");
-          break;
-        case 3:
-          lcd.print("10");
-          break;
-      }
-      lcd.print("mA");
+    case 2:
+      snprintf(strBuffer, 15, "%fV", sample.value.floatRep/1000);
+      lcd.setCursor(0, 0);
+      lcd.write(strBuffer);
+      lcd.setCursor(13, 1);
+      lcd.write(PLUS_MINUS);
+      lcd.write("5V");
       break;
-    case RESISTANCE:
-      lcd.print(PLUS_MINUS);
-      switch(resolution) {
-        case 1:
-          lcd.print("1k");
-          break;
-        case 2:
-          lcd.print("1M");
-          break;
-      }
-      lcd.print(OHM);
-      break;
-      break;
-    case CONTINUITY:
-      break;
-    case LOGIC:
+    case 1:
+      snprintf(strBuffer, 15, "%fV", sample.value.floatRep/1000);
+      lcd.setCursor(0, 0);
+      lcd.write(strBuffer);
+      lcd.setCursor(12, 1);
+      lcd.write(PLUS_MINUS);
+      lcd.write("12V");
       break;
   }
+}
+
+void MultimeterScreen::displayCurrent(TypedSample_t sample)
+{
+    switch(sample.resolution) {
+    case 3:
+      snprintf(strBuffer, 15, "%fmA", sample.value.floatRep);
+      lcd.setCursor(0, 0);
+      lcd.write(strBuffer);
+      lcd.setCursor(11, 1);
+      lcd.write(PLUS_MINUS);
+      lcd.write("10mA");
+      break;
+    case 2:
+      snprintf(strBuffer, 15, "%fmA", sample.value.floatRep);
+      lcd.setCursor(0, 0);
+      lcd.write(strBuffer);
+      lcd.setCursor(10, 1);
+      lcd.write(PLUS_MINUS);
+      lcd.write("200mA");
+      break;
+  }
+}
+
+void MultimeterScreen::displayResistance(TypedSample_t sample)
+{
+  switch(sample.resolution) {
+    case 3:
+      snprintf(strBuffer, 14, "%f", sample.value.floatRep);
+      lcd.setCursor(0, 0);
+      lcd.write(strBuffer);
+      lcd.write(OHM);
+      lcd.setCursor(13, 1);
+      lcd.write("1k");
+      lcd.write(OHM);
+      break;
+    case 2:
+      snprintf(strBuffer, 14, "%f", sample.value.floatRep/1000);
+      lcd.setCursor(0, 0);
+      lcd.write(strBuffer);
+      lcd.write(OHM);
+      lcd.setCursor(13, 1);
+      lcd.write("1M");
+      lcd.write(OHM);
+      break;
+  }
+}
+
+void MultimeterScreen::displayContinuity(TypedSample_t sample)
+{
+  if (sample.value.floatRep < 5.0) {
+    lcd.write("CONNECTED");
+  } else {
+    lcd.write("DISCONNECTED");
+  }
+}
+
+void MultimeterScreen::displayLogic(TypedSample_t sample)
+{
+  lcd.write("hello");
 }
 
 void MultimeterScreen::displaySampleMode(uint8_t sample_mode)
@@ -158,7 +182,8 @@ void MultimeterScreen::displaySampleMode(uint8_t sample_mode)
       lcd.write("ACC");
       break;
     case RESISTANCE:
-      lcd.write("RES");
+      lcd.write(OHM);
+      lcd.write("TR");
       break;
     case CONTINUITY:
       lcd.write("CNT");
@@ -174,31 +199,31 @@ void MultimeterScreen::displaySampleRate(uint8_t sample_period)
   lcd.setCursor(4, 1);
   switch(sample_period) {
     case HALF_SEC:
-      lcd.write("2/s ");
+      lcd.write(" 2/sec");
       break;
     case ONE_SEC:
-      lcd.write("1/s ");
+      lcd.write(" 1/sec");
       break;
     case TWO_SEC:
-      lcd.write("30/m");
+      lcd.write("30/min");
       break;
     case FIVE_SEC:
-      lcd.write("12/m");
+      lcd.write("12/min");
       break;
     case TEN_SEC:
-      lcd.write("6/m ");
+      lcd.write(" 6/min");
       break;
     case ONE_MIN:
-      lcd.write("1/m ");
+      lcd.write(" 1/min");
       break;
     case TWO_MIN:
-      lcd.write("30/h");
+      lcd.write("30/hr ");
       break;
     case FIVE_MIN:
-      lcd.write("12/h");
+      lcd.write("12/hr ");
       break;
     case TEN_MIN:
-      lcd.write("6/h ");
+      lcd.write(" 6/hr ");
       break;
   }
 }
@@ -206,7 +231,7 @@ void MultimeterScreen::displaySampleRate(uint8_t sample_period)
 void MultimeterScreen::displayBrightness(uint8_t new_brightness)
 {
   brightness = new_brightness;
-  lcd.setCursor(15, 1);
+  lcd.setCursor(15, 0);
   lcd.write((uint8_t) brightness);
   analogWrite(brightnessPWMPin, (4 - brightness)*51);
 }

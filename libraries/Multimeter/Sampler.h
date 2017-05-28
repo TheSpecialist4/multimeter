@@ -29,8 +29,7 @@
 #define BIG_RESISTOR    2
 
 #define AMPMETER_OFF  0
-#define AMPMETER_LOW  1
-#define AMPMETER_HIGH 2
+#define AMPMETER_ON   1
 
 class Sampler
 {
@@ -54,9 +53,9 @@ class Sampler
 
     void configureADC();
 
-    void setAmplifierState(uint8_t new_state);
     void setOhmmeterState(uint8_t new_state);
     void setAmpmeterState(uint8_t new_state);
+    void setAmplifierState(uint8_t new_state);
     void disableAllModes();
 
     float getADCmV();
@@ -69,11 +68,11 @@ class Sampler
     TypedSample_t getContinuity();
     TypedSample_t getLogic();
 
-    float calcDCVoltage(uint8_t amp_state);
-    float calcACVoltage(uint8_t amp_state);
-    float calcDCCurrent(uint8_t amp_state);
-    float calcACCurrent(uint8_t amp_state);
-    float calcResistance(uint8_t ohmeter_state);
+    float calcDCVoltage(float adc_mv_val, uint8_t amp_state);
+    float calcACVoltage(float adc_mv_val, uint8_t amp_state);
+    float calcDCCurrent(float adc_mv_val, uint8_t amp_state);
+    float calcACCurrent(float adc_mv_val, uint8_t amp_state);
+    float calcResistance(float adc_mv_val, uint8_t ohmeter_state);
 
     int sign();
 
@@ -89,6 +88,8 @@ class Sampler
     /// @brief      Create the event
     ///
     void begin();
+    
+    void incrAmp();
 
     TypedSample_t sample(uint8_t type);
 };

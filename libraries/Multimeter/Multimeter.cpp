@@ -52,23 +52,22 @@ void Multimeter::begin(uint8_t default_sample_mode, uint8_t default_sample_perio
     pinMode(sampleLedPin, OUTPUT);
     pinMode(statusLedPin, OUTPUT);
     pinMode(buzzerPin, OUTPUT);
-
     samplerSemaphore.begin();
     screenSemaphore.begin();
     loggerSemaphore.begin();
 
     sampleMode = default_sample_mode;
     samplePeriod = default_sample_period;
-    
-    samplerSemaphore.waitFor();
-    sampler.begin();
-    samplerSemaphore.post();
 
     screenSemaphore.waitFor();
     screen.begin(default_brightness);
     screen.displaySampleMode(sampleMode);
     screen.displaySampleRate(samplePeriod);
     screenSemaphore.post();
+
+    samplerSemaphore.waitFor();
+    sampler.begin();
+    samplerSemaphore.post();
 
     serialTxMailbox.begin(10);
 }
@@ -79,8 +78,10 @@ void Multimeter::buttonPressed(uint32_t button_event)
         case NOT_LOGGING:
             switch(button_event) {
                 case SAMPLE_MODE_BUTTON_PRESS:
-                    sampleMode = nextSampleMode(sampleMode);
-
+                    //sampleMode = nextSampleMode(sampleMode);
+                    samplerSemaphore.waitFor();
+                    sampler.incrAmp();
+                    samplerSemaphore.post();
                     screenSemaphore.waitFor();
                     screen.displaySampleMode(sampleMode);
                     screenSemaphore.post();
@@ -88,6 +89,7 @@ void Multimeter::buttonPressed(uint32_t button_event)
                 case SAMPLE_RATE_BUTTON_PRESS:
                     samplePeriod = nextSamplePeriod(samplePeriod);
 
+                    
                     screenSemaphore.waitFor();
                     screen.displaySampleRate(samplePeriod);
                     screenSemaphore.post();
@@ -156,20 +158,19 @@ void Multimeter::instructionReceived(Instruction_t instruction)
 
 void Multimeter::sample()
 {
+    digitalWrite(statusLedPin, HIGH);
     digitalWrite(sampleLedPin, HIGH);
     samplerSemaphore.waitFor();
     TypedSample_t new_sample = sampler.sample(sampleMode);
     samplerSemaphore.post();
 
-    Serial.println(new_sample.value.floatRep);
-    Serial.println(new_sample.type);
-    Serial.println(sampleMode);
     screenSemaphore.waitFor();
     screen.displaySample(new_sample);
     screenSemaphore.post();
     if (serialTxMailbox.available() < 10) {
         serialTxMailbox.post(new_sample, BIOS_NO_WAIT);
     }
+    digitalWrite(statusLedPin, LOW);
     digitalWrite(sampleLedPin, LOW);
 }
 
