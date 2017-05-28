@@ -1,6 +1,7 @@
 using ENGG4810_Multimeter.Model;
 using GalaSoft.MvvmLight;
 using LiveCharts;
+using LiveCharts.Defaults;
 using LiveCharts.Wpf;
 using Microsoft.Win32;
 using System;
@@ -146,11 +147,11 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
-        private double maskLowIndex;
+        private double maskLowXValue;
         private double maskHighIndex;
 
-        private double lowHighest = 3;
-        private double highLowest = 6;
+        private double lowHighest = -1;
+        private double highLowest = -1;
 
         public string[] Labels { get; set; }
         public Func<double, string> YFormatter { get; set; }
@@ -158,6 +159,21 @@ namespace ENGG4810_Multimeter.ViewModel
         private Random random = new Random();
 
         public SerialFacade SerialHandler { get; set; }
+
+        private string _maskText;
+        public string MaskText
+        {
+            get { return _maskText; }
+            set {
+                if (_maskText == value) return;
+                _maskText = value;
+                RaisePropertyChanged("MaskText");
+            }
+        }
+
+
+        //temp variables
+        private double dataX = 0;
 
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.
@@ -184,7 +200,7 @@ namespace ENGG4810_Multimeter.ViewModel
                 new LineSeries
                 {
                     Title = "Data",
-                    Values = new ChartValues<double>(),
+                    Values = new ChartValues<ObservablePoint>(),
                     LineSmoothness = 0.5 //straight lines, 1 really smooth lines
                 },
             };
@@ -260,7 +276,7 @@ namespace ENGG4810_Multimeter.ViewModel
                     new LineSeries
                     {
                         Title = "Low",
-                        Values = new ChartValues<double>(),
+                        Values = new ChartValues<ObservablePoint>(),
                         LineSmoothness = 0.1,
                         StrokeThickness = 0.5
                     });
@@ -268,22 +284,22 @@ namespace ENGG4810_Multimeter.ViewModel
                     new LineSeries
                     {
                         Title = "High",
-                        Values = new ChartValues<double>(),
+                        Values = new ChartValues<ObservablePoint>(),
                         LineSmoothness = 0.1,
                         StrokeThickness = 0.5
                     });
             }
-            SeriesCollection[1].Values.Add(2.0);
-            SeriesCollection[2].Values.Add(6.0);
+            //SeriesCollection[1].Values.Add(2.0);
+            //SeriesCollection[2].Values.Add(6.0);
 
-            SeriesCollection[1].Values.Add(3.0);
-            SeriesCollection[2].Values.Add(10.0);
+            //SeriesCollection[1].Values.Add(3.0);
+            //SeriesCollection[2].Values.Add(10.0);
 
-            SeriesCollection[1].Values.Add(1.0);
-            SeriesCollection[2].Values.Add(8.0);
+            //SeriesCollection[1].Values.Add(1.0);
+            //SeriesCollection[2].Values.Add(8.0);
 
-            SeriesCollection[1].Values.Add(2.0);
-            SeriesCollection[2].Values.Add(7.0);
+            //SeriesCollection[1].Values.Add(2.0);
+            //SeriesCollection[2].Values.Add(7.0);
         }
 
         public void SwitchToConnected()
@@ -367,7 +383,7 @@ namespace ENGG4810_Multimeter.ViewModel
             Unit = data[0];
             for (int i = 1; i < data.Length; i++)
             {
-                SeriesCollection[0].Values.Add(double.Parse(data[i]));
+                SeriesCollection[0].Values.Add(new ObservablePoint { X = dataX++, Y = double.Parse(data[i])});
                 Value = data[i];
             }
         }
@@ -383,30 +399,121 @@ namespace ENGG4810_Multimeter.ViewModel
             double x, y;
             if (double.TryParse(xstring, out x) && double.TryParse(ystring, out y))
             {
-                if (y >= highLowest)
+                if (lowHighest < 0) { lowHighest = y; }
+                if (y > lowHighest) { lowHighest = y; }
+
+                if (y >= GetHighValueAt(x))
                 {
                     return false;
                 }
-                if (x < SeriesCollection[1].Values.Count)
+                if (SeriesCollection[1].Values.Count == 0)
                 {
-                    SeriesCollection[1].Values.Insert((int)x, y);
-                    if (y > lowHighest) { lowHighest = y; }
+                    SeriesCollection[1].Values.Add(new ObservablePoint { X = 0, Y = y });
+                }
+                if (x < ((ObservablePoint)SeriesCollection[1].Values[SeriesCollection[1].Values.Count - 1]).X)
+                {
+                    int index = 0;
+                    while (((ObservablePoint)SeriesCollection[1].Values[index]).X < x)
+                    {
+                        index++;
+                    }
+                    SeriesCollection[1].Values.Insert(index, new ObservablePoint { X = x, Y = y });
                     return true;
                 }
-                while (SeriesCollection[1].Values.Count < x)
+                SeriesCollection[1].Values.Add(new ObservablePoint { X = x, Y = y});
+            }
+            if (SeriesCollection[0].Values.Count > 0)
+            {
+                double lastDataXValue = ((ObservablePoint)SeriesCollection[0]
+                        .Values[SeriesCollection[0].Values.Count - 1]).X;
+                bool isPresent = false;
+                foreach (ObservablePoint point in SeriesCollection[1].Values)
                 {
-                    SeriesCollection[1].Values.Add(y);
+                    if (point.X == lastDataXValue)
+                    {
+                        isPresent = true;
+                        break;
+                    }
                 }
-                SeriesCollection[1].Values.Add(y);
-                if (y > lowHighest) { lowHighest = y; }
+                if (!isPresent)
+                {
+                    SeriesCollection[1].Values.Add(new ObservablePoint
+                    {
+                        X = lastDataXValue,
+                        Y = ((ObservablePoint)SeriesCollection[1].Values[SeriesCollection[1].Values.Count - 1]).Y
+                    });
+                }
             }
             return true;
         }
 
         public bool EditLow(string xstring, string ystring)
         {
-            SeriesCollection[1].Values.RemoveAt((int)maskLowIndex);
-            return AddToLow(xstring, ystring);
+            double x;
+            if (double.TryParse(xstring, out x))
+            {
+                foreach (ObservablePoint point in SeriesCollection[1].Values)
+                {
+                    if (point.X == maskLowXValue)
+                    {
+                        double y = 0;
+                        if (double.TryParse(ystring, out y))
+                        {
+                            point.Y = y;
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        private double GetHighValueAt(double x)
+        {
+            double value = 0;
+            ObservablePoint low = new ObservablePoint { X = 0, Y = 0 };
+            ObservablePoint high = new ObservablePoint { X = 0, Y = 0 };
+            foreach (ObservablePoint point in SeriesCollection[2].Values)
+            {
+                if (point.X == x)
+                {
+                    return point.Y;
+                }
+                if (point.X < x)
+                {
+                    low = point;
+                }
+                if (point.X > x)
+                {
+                    high = point;
+                }
+            }
+            value = low.Y + ((x - low.X) / (high.X - low.X)) * (high.Y - low.Y);
+            return value;
+        }
+
+        private double GetLowValueAt(double x)
+        {
+            double value = 0;
+            ObservablePoint low = new ObservablePoint { X = 0, Y = 0 };
+            ObservablePoint high = new ObservablePoint { X = 0, Y = 0 };
+            foreach (ObservablePoint point in SeriesCollection[1].Values)
+            {
+                if (point.X == x)
+                {
+                    return point.Y;
+                }
+                if (point.X < x)
+                {
+                    low = point;
+                }
+                if (point.X > x)
+                {
+                    high = point;
+                }
+            }
+            value = low.Y + ((x - low.X) / (high.X - low.X)) * (high.Y - low.Y);
+            return value;
         }
 
         public bool DeleteFromLow(string xValue)
@@ -414,9 +521,14 @@ namespace ENGG4810_Multimeter.ViewModel
             double x;
             if (double.TryParse(xValue, out x))
             {
-                if (SeriesCollection[1].Values.Count < x) { return false; }
-                SeriesCollection[1].Values.RemoveAt((int)x);
-                return true;
+                foreach (ObservablePoint point in SeriesCollection[1].Values)
+                {
+                    if (point.X == x)
+                    {
+                        SeriesCollection[1].Values.Remove(point);
+                        return true;
+                    }
+                }
             }
             return false;
         }
@@ -426,22 +538,50 @@ namespace ENGG4810_Multimeter.ViewModel
             double x, y;
             if (double.TryParse(xstring, out x) && double.TryParse(ystring, out y))
             {
-                if (y <= lowHighest)
+                if (highLowest < 0) { highLowest = y; }
+                if (y < highLowest) { highLowest = y; }
+
+                if (y <= GetLowValueAt(x))
                 {
                     return false;
                 }
-                if (x < SeriesCollection[2].Values.Count)
+                if (SeriesCollection[2].Values.Count == 0)
                 {
-                    SeriesCollection[2].Values.Insert((int)x, y);
-                    if (y < highLowest) { highLowest = y; }
+                    SeriesCollection[2].Values.Add(new ObservablePoint { X = 0, Y = y });
+                }
+                if (x < ((ObservablePoint)SeriesCollection[2].Values[SeriesCollection[2].Values.Count - 1]).X)
+                {
+                    int index = 0;
+                    while (((ObservablePoint)SeriesCollection[2].Values[index]).X < x)
+                    {
+                        index++;
+                    }
+                    SeriesCollection[2].Values.Insert(index, new ObservablePoint { X = x, Y = y });
                     return true;
                 }
-                while (SeriesCollection[2].Values.Count < x)
+                SeriesCollection[2].Values.Add(new ObservablePoint { X = x, Y = y });
+            }
+            if (SeriesCollection[0].Values.Count > 0)
+            {
+                double lastDataXValue = ((ObservablePoint)SeriesCollection[0]
+                        .Values[SeriesCollection[0].Values.Count - 1]).X;
+                bool isPresent = false;
+                foreach (ObservablePoint point in SeriesCollection[2].Values)
                 {
-                    SeriesCollection[2].Values.Add(y);
+                    if (point.X == lastDataXValue)
+                    {
+                        isPresent = true;
+                        break;
+                    }
                 }
-                SeriesCollection[2].Values.Add(y);
-                if (y < highLowest) { highLowest = y; }
+                if (!isPresent)
+                {
+                    SeriesCollection[2].Values.Add(new ObservablePoint
+                    {
+                        X = lastDataXValue,
+                        Y = ((ObservablePoint)SeriesCollection[2].Values[SeriesCollection[2].Values.Count - 1]).Y
+                    });
+                }
             }
             return true;
         }
@@ -451,17 +591,37 @@ namespace ENGG4810_Multimeter.ViewModel
             double x;
             if (double.TryParse(xValue, out x))
             {
-                if (SeriesCollection[2].Values.Count < x) { return false; }
-                SeriesCollection[2].Values.RemoveAt((int)x);
-                return true;
+                foreach (ObservablePoint point in SeriesCollection[2].Values)
+                {
+                    if (point.X == x)
+                    {
+                        SeriesCollection[2].Values.Remove(point);
+                        return true;
+                    }
+                }
             }
             return false;
         }
 
-        public bool EditHigh(string x, string y)
+        public bool EditHigh(string xstring, string ystring)
         {
-            SeriesCollection[2].Values.RemoveAt((int)maskHighIndex);
-            return AddToHigh(x, y);
+            double x;
+            if (double.TryParse(xstring, out x))
+            {
+                foreach (ObservablePoint point in SeriesCollection[2].Values)
+                {
+                    if (point.X == x)
+                    {
+                        double y = 0;
+                        if (double.TryParse(ystring, out y))
+                        {
+                            point.Y = y;
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
         }
 
         public string HandlePointClick(ChartPoint point)
@@ -474,7 +634,7 @@ namespace ENGG4810_Multimeter.ViewModel
                 MaskHighX = "";
                 MaskHighY = "";
 
-                maskLowIndex = point.X;
+                maskLowXValue = point.X;
 
                 return "low";
             } else if (SeriesCollection.IndexOf(point.SeriesView) == 2)
@@ -495,6 +655,74 @@ namespace ENGG4810_Multimeter.ViewModel
         public void SendMode()
         {
             SerialHandler.SendZero();
+        }
+
+        public void TestMask()
+        {
+            MaskValues.ClearMasks();
+
+            bool isStart = true;
+            double start = -1;
+            double end = -1;
+            double prevValue = 0;
+            for (int i = 0; i < SeriesCollection[0].Values.Count; i++)
+            {
+                ObservablePoint point = SeriesCollection[0].Values[i] as ObservablePoint;
+                double highValue = GetHighValueAt(point.X);
+                double lowValue = GetLowValueAt(point.X);
+
+                Debug.WriteLine($"checking for ({point.X},{point.Y}) low: {lowValue} high: {highValue}");
+
+                if (point.Y > highValue || point.Y < lowValue)
+                {
+                    prevValue = point.Y;
+                    if (i == 0) {
+                        start = 0;
+                        isStart = false;
+                    }
+                    else
+                    {
+                        double intersection = 0;
+                        ObservablePoint prevPoint = SeriesCollection[0].Values[i - 1] as ObservablePoint;
+                        if (point.Y > highValue)
+                        {
+                            intersection = prevPoint.X + ((highValue - prevPoint.Y) / (point.Y - prevPoint.Y)) 
+                                * (point.X - prevPoint.X);
+                        } else
+                        {
+                            intersection = prevPoint.X + ((lowValue - prevPoint.Y) / (point.Y - prevPoint.Y))
+                                * (point.X - prevPoint.X);
+                        }
+
+                        if (isStart)
+                        {
+                            start = intersection;
+                            isStart = false;
+                        }
+                    }
+                } else
+                {
+                    if (!isStart)
+                    {
+                        ObservablePoint prevPoint = SeriesCollection[0].Values[i - 1] as ObservablePoint;
+                        if (prevValue > highValue)
+                        {
+                            end = prevPoint.X + ((highValue - prevPoint.Y) / (point.Y - prevPoint.Y))
+                                * (point.X - prevPoint.X);
+                            Debug.WriteLine("setting end from high");
+                        } else
+                        {
+                            end = prevPoint.X + ((lowValue - prevPoint.Y) / (point.Y - prevPoint.Y))
+                                * (point.X - prevPoint.X);
+                            Debug.WriteLine("setting end from low");
+                        }
+                        Debug.WriteLine($"adding to mask: {start} {end}");
+                        MaskValues.AddToMask(start, end);
+                        isStart = true;
+                    }
+                }
+            }
+            MaskText = MaskValues.GetMaskText();
         }
     }
 }

@@ -163,7 +163,10 @@ namespace ENGG4810_Multimeter
         {
             byte[] buffer = new byte[1];
             buffer[0] = 0;
-            port.Write(buffer, 0, 1);
+            if (port != null)
+            {
+                port.Write(buffer, 0, 1);
+            }
         }
     }
 }

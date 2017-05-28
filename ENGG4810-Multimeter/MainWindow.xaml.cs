@@ -218,7 +218,7 @@ namespace ENGG4810_Multimeter
             }
             else
             {
-                txtBoxLowY.BorderBrush = new SolidColorBrush(Colors.Gray);
+                txtBoxLowY.BorderBrush = new SolidColorBrush(Colors.LightGray);
             }
         }
 
@@ -237,7 +237,7 @@ namespace ENGG4810_Multimeter
             }
             else
             {
-                txtBoxLowX.BorderBrush = new SolidColorBrush(Colors.Gray);
+                txtBoxLowX.BorderBrush = new SolidColorBrush(Colors.LightGray);
             }
         }
 
@@ -249,7 +249,7 @@ namespace ENGG4810_Multimeter
             }
             else
             {
-                txtBoxHighY.BorderBrush = new SolidColorBrush(Colors.Gray);
+                txtBoxHighY.BorderBrush = new SolidColorBrush(Colors.LightGray);
             }
         }
 
@@ -261,7 +261,7 @@ namespace ENGG4810_Multimeter
             }
             else
             {
-                txtBoxHighX.BorderBrush = new SolidColorBrush(Colors.Gray);
+                txtBoxHighX.BorderBrush = new SolidColorBrush(Colors.LightGray);
             }
         }
 
@@ -287,6 +287,16 @@ namespace ENGG4810_Multimeter
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             vm.SendMode();
+        }
+
+        private void btnLoadMaskFile_Click(object sender, RoutedEventArgs e)
+        {
+            vm.TestMask();
+        }
+
+        private void chart_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            
         }
     }
 }
