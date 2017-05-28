@@ -1,4 +1,5 @@
 ﻿using ENGG4810_Multimeter.ViewModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -25,13 +26,12 @@ namespace ENGG4810_Multimeter
             buttonGreen = (Color)ColorConverter.ConvertFromString("#85e263");
 
             vm = (MainViewModel)this.DataContext;
-
-            changeMultiBtnBorderToGreen("V");
        }
 
         private void btnConnected_Click(object sender, RoutedEventArgs e)
         {
-            vm.IsModeConnected = true;
+            vm.SwitchToConnected();
+
             btnDisconnected.BorderBrush = new SolidColorBrush(Colors.Transparent);
             btnConnected.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9017a5"));
 
@@ -40,9 +40,9 @@ namespace ENGG4810_Multimeter
             btnOpenFile.Visibility = Visibility.Collapsed;
             btnSave.Visibility = Visibility.Visible;
 
-            vm.SwitchMode();
+            stackPanelMasks.Visibility = Visibility.Collapsed;
 
-            BeginStoryboard(this.FindResource("ModeLoadStoryboard") as Storyboard);
+            //BeginStoryboard(this.FindResource("ModeLoadStoryboard") as Storyboard);
         }
 
         private void btnDisconnected_Click(object sender, RoutedEventArgs e)
@@ -63,7 +63,7 @@ namespace ENGG4810_Multimeter
 
         private void SwitchToDisconnectedMode()
         {
-            vm.IsModeConnected = false;
+            vm.SwitchToDisconnected();
             btnConnected.BorderBrush = new SolidColorBrush(Colors.Transparent);
             btnDisconnected.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9017a5"));
 
@@ -72,9 +72,9 @@ namespace ENGG4810_Multimeter
 
             btnPlay.Content = "\xE768";
 
-            vm.SwitchMode();
-
             BeginStoryboard(this.FindResource("ModeLoadStoryboard") as Storyboard);
+
+            stackPanelMasks.Visibility = Visibility.Visible;
         }
 
         private void btnPlay_Click(object sender, RoutedEventArgs e)
@@ -104,6 +104,9 @@ namespace ENGG4810_Multimeter
         private void btnMultimeterHide_Click(object sender, RoutedEventArgs e)
         {
             columnMultimeter.Width = new GridLength(0.0);
+
+            //BeginStoryboard(this.FindResource("ShowFileErrorStoryboard") as Storyboard);
+
         }
 
         private void btnCurrent_Click(object sender, RoutedEventArgs e)
@@ -135,24 +138,24 @@ namespace ENGG4810_Multimeter
 
         private void changeMultiBtnBorderToGreen(string buttonType)
         {
-            btnResistance.Background = new SolidColorBrush(buttonGray);
-            btnCurrent.Background = new SolidColorBrush(buttonGray);
-            btnVoltage.Background = new SolidColorBrush(buttonGray);
+            //btnResistance.Background = new SolidColorBrush(buttonGray);
+            //btnCurrent.Background = new SolidColorBrush(buttonGray);
+            //btnVoltage.Background = new SolidColorBrush(buttonGray);
 
-            switch (buttonType)
-            {
-                case "V":
-                    btnVoltage.Background = new SolidColorBrush(buttonGreen);
-                    break;
-                case "C":
-                    btnCurrent.Background = new SolidColorBrush(buttonGreen);
-                    break;
-                case "R":
-                    btnResistance.Background = new SolidColorBrush(buttonGreen);
-                    break;
-                default:
-                    break;
-            }
+            //switch (buttonType)
+            //{
+            //    case "V":
+            //        btnVoltage.Background = new SolidColorBrush(buttonGreen);
+            //        break;
+            //    case "C":
+            //        btnCurrent.Background = new SolidColorBrush(buttonGreen);
+            //        break;
+            //    case "R":
+            //        btnResistance.Background = new SolidColorBrush(buttonGreen);
+            //        break;
+            //    default:
+            //        break;
+            //}
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -179,6 +182,111 @@ namespace ENGG4810_Multimeter
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             vm.SetUpSerial();
+        }
+
+        private void chart_DataClick(object sender, LiveCharts.ChartPoint chartPoint)
+        {
+            var chartType = vm.HandlePointClick(chartPoint);
+
+            btnLowDelete.IsEnabled = false;
+            btnHighDelete.IsEnabled = false;
+
+            switch(chartType)
+            {
+                case "low":
+                    btnLowDelete.IsEnabled = true;
+                    btnLowAdd.Visibility = Visibility.Collapsed;
+                    btnLowEdit.Visibility = Visibility.Visible;
+
+                    btnHighAdd.Content = "\xE710";
+                    break;
+                case "high":
+                    btnHighDelete.IsEnabled = true;
+                    btnHighAdd.Visibility = Visibility.Collapsed;
+                    btnHighEdit.Visibility = Visibility.Visible;
+
+                    btnLowAdd.Content = "\xE710";
+                    break;
+            }
+        }
+
+        private void btnLowAdd_Click(object sender, RoutedEventArgs e)
+        {
+            if (!vm.AddToLow(txtBoxLowX.Text, txtBoxLowY.Text))
+            {
+                txtBoxLowY.BorderBrush = new SolidColorBrush(Colors.Red);
+            }
+            else
+            {
+                txtBoxLowY.BorderBrush = new SolidColorBrush(Colors.Gray);
+            }
+        }
+
+        private void btnLowEdit_Click(object sender, RoutedEventArgs e)
+        {
+            vm.EditLow(txtBoxLowX.Text, txtBoxLowY.Text);
+            btnLowEdit.Visibility = Visibility.Collapsed;
+            btnLowAdd.Visibility = Visibility.Visible;
+        }
+
+        private void btnLowDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (!vm.DeleteFromLow(txtBoxLowX.Text))
+            {
+                txtBoxLowX.BorderBrush = new SolidColorBrush(Colors.Red);
+            }
+            else
+            {
+                txtBoxLowX.BorderBrush = new SolidColorBrush(Colors.Gray);
+            }
+        }
+
+        private void btnHighAdd_Click(object sender, RoutedEventArgs e)
+        {
+            if (!vm.AddToHigh(txtBoxHighX.Text, txtBoxHighY.Text))
+            {
+                txtBoxHighY.BorderBrush = new SolidColorBrush(Colors.Red);
+            }
+            else
+            {
+                txtBoxHighY.BorderBrush = new SolidColorBrush(Colors.Gray);
+            }
+        }
+
+        private void btnHighDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (!vm.DeleteFromHigh(txtBoxHighX.Text))
+            {
+                txtBoxHighX.BorderBrush = new SolidColorBrush(Colors.Red);
+            }
+            else
+            {
+                txtBoxHighX.BorderBrush = new SolidColorBrush(Colors.Gray);
+            }
+        }
+
+        private void btnHighEdit_Click(object sender, RoutedEventArgs e)
+        {
+            vm.EditHigh(txtBoxHighX.Text, txtBoxHighY.Text);
+            btnHighAdd.Visibility = Visibility.Visible;
+            btnHighEdit.Visibility = Visibility.Collapsed;
+        }
+
+        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Escape)
+            {
+                btnLowAdd.Visibility = Visibility.Visible;
+                btnHighAdd.Visibility = Visibility.Visible;
+
+                btnLowEdit.Visibility = Visibility.Collapsed;
+                btnHighEdit.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            vm.SendMode();
         }
     }
 }
