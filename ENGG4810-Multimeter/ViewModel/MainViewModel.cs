@@ -33,11 +33,23 @@ namespace ENGG4810_Multimeter.ViewModel
     /// </summary>
     public class MainViewModel : ViewModelBase
     {
+        /// <summary>
+        /// The current mode of software
+        /// </summary>
         public bool IsModeConnected;
+        /// <summary>
+        /// Whether or not acquisition is paused
+        /// </summary>
         public bool IsReading { get; set; }
 
+        /// <summary>
+        /// Connection to serial port established
+        /// </summary>
         public bool IsSerialWorking { get; set; }
 
+        /// <summary>
+        /// Value of the data sample
+        /// </summary>
         private string _value;
         public string Value
         {
@@ -52,6 +64,9 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
+        /// <summary>
+        /// Unit of the sample
+        /// </summary>
         private string _unit;
         public string Unit
         {
@@ -63,6 +78,9 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
+        /// <summary>
+        /// The type of data (Current/Resistance/Voltage)
+        /// </summary>
         private string _dataType;
         public string DataType
         {
@@ -74,10 +92,19 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
+        /// <summary>
+        /// Data file
+        /// </summary>
         private string DataFileLocation;
 
+        /// <summary>
+        /// Chart series
+        /// </summary>
         public SeriesCollection SeriesCollection { get; set; }
 
+        /// <summary>
+        /// Minimum x axis value in chart
+        /// </summary>
         private double _xAxisMin;
         public double XAxisMin {
             get {
@@ -91,6 +118,9 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
+        /// <summary>
+        /// Maximum x axis value displayed on chart
+        /// </summary>
         private double _xAxisMax;
         public double XAxisMax
         {
@@ -103,6 +133,9 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
+        /// <summary>
+        /// The x coordinate of currently selected Low mask point
+        /// </summary>
         private string _maskLowX;
         public string MaskLowX
         {
@@ -114,6 +147,9 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
+        /// <summary>
+        /// The y coordinate of the currently selected low mask point
+        /// </summary>
         private string _maskLowY;
         public string MaskLowY
         {
@@ -125,6 +161,9 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
+        /// <summary>
+        /// The x coordinate of the currently selected High mask point
+        /// </summary>
         private string _maskHighX;
         public string MaskHighX
         {
@@ -136,6 +175,9 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
+        /// <summary>
+        /// The y coordinate of the currently selected High mask point
+        /// </summary>
         private string _maskHighY;
         public string MaskHighY
         {
@@ -153,11 +195,24 @@ namespace ENGG4810_Multimeter.ViewModel
         private double lowHighest = -1;
         private double highLowest = -1;
 
+        /// <summary>
+        /// Labels on the chart
+        /// </summary>
         public string[] Labels { get; set; }
+
+        /// <summary>
+        /// formatter for the Y values on the chart
+        /// </summary>
         public Func<double, string> YFormatter { get; set; }
 
+        /// <summary>
+        /// Serial communication handler
+        /// </summary>
         public SerialFacade SerialHandler { get; set; }
 
+        /// <summary>
+        /// The failure descriptions of mask test
+        /// </summary>
         private string _maskText;
         public string MaskText
         {
@@ -169,6 +224,24 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
+        /// <summary>
+        /// The timestamp in ISO 8601 format
+        /// </summary>
+        private string _timestamp;
+        public string Timestamp
+        {
+            get { return _timestamp; }
+            set {
+                if (_timestamp == value) return;
+                _timestamp = value;
+                RaisePropertyChanged("Timestamp");
+            }
+        }
+
+        private string startTimeString = "";
+        private string endTime = "";
+
+        private DateTime startTime;
 
         //temp variables
         private double dataX = 0;
@@ -204,29 +277,45 @@ namespace ENGG4810_Multimeter.ViewModel
             };
         }
 
-        public void SetUpSerial()
+        /// <summary>
+        /// Sets up serial port connection
+        /// </summary>
+        /// <returns>True if connection was successfully established</returns>
+        public bool SetUpSerial()
         {
             SerialHandler = SerialFacade.GetInstance();
             SerialHandler.IncomingData.CollectionChanged += SerialIncomingData_CollectionChanged;
 
             IsSerialWorking = SerialHandler.SetupConnection();
+            return IsSerialWorking;
         }
 
         private void SerialIncomingData_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add && IsReading)
             {
+                // first value
+                if (SeriesCollection[0].Values.Count == 0)
+                {
+                    startTime = DateTime.UtcNow;
+                    startTimeString = startTime.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffffffzzz");
+                }
+                endTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffffffzzz");
+                Timestamp = startTimeString + "/" + endTime;
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
                 {
-                    double value = double.Parse(SerialHandler.IncomingData[SerialHandler.IncomingData.Count - 1]);
-                    SeriesCollection[0].Values.Add(value);
-                    if (SeriesCollection[0].Values.Count > 10)
+                    for (int i = SeriesCollection[0].Values.Count; i < SerialHandler.IncomingData.Count; i++)
                     {
-                        XAxisMin++;
-                        XAxisMax++;
+                        double value = double.Parse(SerialHandler.IncomingData[i]);
+                        SeriesCollection[0].Values.Add(value);
+                        if (SeriesCollection[0].Values.Count > 10)
+                        {
+                            XAxisMin++;
+                            XAxisMax++;
+                        }
+                        Value = value.ToString();
+                        Debug.WriteLine(value + " added to graph");
                     }
-                    Value = value.ToString();
-                    Debug.WriteLine(value + " added to graph");
                 }));
             }
         }
@@ -251,6 +340,9 @@ namespace ENGG4810_Multimeter.ViewModel
             //}
         }
 
+        /// <summary>
+        /// Switch mode to disconnected
+        /// </summary>
         public void SwitchToDisconnected()
         {
             IsModeConnected = false;
@@ -276,21 +368,35 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
-        public void SwitchToConnected()
+        /// <summary>
+        /// Switch mode to connected
+        /// </summary>
+        /// <returns></returns>
+        public bool SwitchToConnected()
         {
-            IsModeConnected = true;
             if (!SerialHandler.OpenPort())
             {
                 Debug.WriteLine("couldnt open port");
+                return false;
             }
             while(SeriesCollection.Count > 1)
             {
                 SeriesCollection.RemoveAt(SeriesCollection.Count - 1);
             }
+            IsModeConnected = true;
+            return true;
         }
 
+        /// <summary>
+        /// Save the data currently in the graph
+        /// </summary>
         public void SaveData()
         {
+            if (IsReading)
+            {
+                MessageBox.Show("Cannot save data while still acquiring data");
+                return;
+            }
             var saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "CSV File (*.csv)|*.csv";
             if (saveFileDialog.ShowDialog() == true)
@@ -310,6 +416,9 @@ namespace ENGG4810_Multimeter.ViewModel
             return csv;
         }
 
+        /// <summary>
+        /// Start graphing disconnected data
+        /// </summary>
         public void StartGraphingDisconnected()
         {
             if (String.IsNullOrEmpty(DataFileLocation))
@@ -318,6 +427,9 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
+        /// <summary>
+        /// Load data file
+        /// </summary>
         public void LoadFile()
         {
             var openFileDialog = new OpenFileDialog();
@@ -330,6 +442,10 @@ namespace ENGG4810_Multimeter.ViewModel
             openFileDialog.ShowDialog();
         }
 
+        /// <summary>
+        /// Load mask testing file
+        /// </summary>
+        /// <returns>True if the file was of correct format. False otherwise</returns>
         public bool LoadMaskFile()
         {
             var openFileDialog = new OpenFileDialog();
@@ -347,24 +463,42 @@ namespace ENGG4810_Multimeter.ViewModel
             return true;
         }
 
+        /// <summary>
+        /// Load data from the mask file
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns>True if the data is in correct format</returns>
         private bool LoadMaskFileData(string fileName)
         {
+            SeriesCollection[1].Values.Clear();
+            SeriesCollection[2].Values.Clear();
             string[] lines = File.ReadAllText(fileName).Split('\n');
+            bool isValid = true;
             foreach (var line in lines)
             {
                 Debug.WriteLine("line: " + line);
                 string[] tokens = line.Split(',');
-                if (tokens.Length != 4) { Debug.WriteLine("length error"); return false; }
+                if (tokens.Length != 4) { Debug.WriteLine("length error"); isValid = false; }
                 tokens[3] = tokens[3].Replace('\n', ' ');
                 tokens[3] = tokens[3].Trim();
-                if (Unit != tokens[3]) { Debug.WriteLine("unit error" + tokens[3] + Unit); return false; }
-                if (tokens[0].Equals("high"))
+                if (Unit.ToLower() != tokens[3].ToLower()) {
+                    Debug.WriteLine("unit error" + tokens[3] + Unit); isValid = false; }
+                if (tokens[0].ToLower().Equals("high"))
                 {
-                    AddToHigh(tokens[1], tokens[2]);
-                } else if (tokens[0].Equals("low"))
+                    if (!AddToHigh(tokens[1], tokens[2]))
+                    {
+                        isValid = false;
+                    }
+                } else if (tokens[0].ToLower().Equals("low"))
                 {
-                    AddToLow(tokens[1], tokens[2]);
-                } else { Debug.WriteLine("high/low error"); return false; }
+                    if (!AddToLow(tokens[1], tokens[2])) { isValid = false; }
+                } else { Debug.WriteLine("high/low error"); isValid = false; }
+            }
+            if (!isValid)
+            {
+                SeriesCollection[1].Values.Clear();
+                SeriesCollection[2].Values.Clear();
+                return false;
             }
             TestMask();
             return true;
@@ -397,12 +531,21 @@ namespace ENGG4810_Multimeter.ViewModel
             }
         }
 
+        /// <summary>
+        /// Delete all the currently acquired graph data
+        /// </summary>
         public void DeleteGraphData()
         {
             SeriesCollection[0].Values.Clear();
             Value = "0";
         }
 
+        /// <summary>
+        /// Add point to low
+        /// </summary>
+        /// <param name="xstring">X coordinate</param>
+        /// <param name="ystring">Y coordinate</param>
+        /// <returns>True if point was added</returns>
         public bool AddToLow(string xstring, string ystring)
         {
             double x, y;
@@ -427,9 +570,10 @@ namespace ENGG4810_Multimeter.ViewModel
                         index++;
                     }
                     SeriesCollection[1].Values.Insert(index, new ObservablePoint { X = x, Y = y });
-                    return true;
+                } else
+                {
+                    SeriesCollection[1].Values.Add(new ObservablePoint { X = x, Y = y });
                 }
-                SeriesCollection[1].Values.Add(new ObservablePoint { X = x, Y = y});
             }
             if (SeriesCollection[0].Values.Count > 0)
             {
@@ -438,8 +582,9 @@ namespace ENGG4810_Multimeter.ViewModel
                 bool isPresent = false;
                 foreach (ObservablePoint point in SeriesCollection[1].Values)
                 {
-                    if (point.X == lastDataXValue)
+                    if (point.X >= lastDataXValue)
                     {
+                        Debug.WriteLine("found higher x value in low");
                         isPresent = true;
                         break;
                     }
@@ -456,6 +601,12 @@ namespace ENGG4810_Multimeter.ViewModel
             return true;
         }
 
+        /// <summary>
+        /// Edit currently selected low mask point
+        /// </summary>
+        /// <param name="xstring"></param>
+        /// <param name="ystring"></param>
+        /// <returns>True if point was edited</returns>
         public bool EditLow(string xstring, string ystring)
         {
             double x;
@@ -525,6 +676,11 @@ namespace ENGG4810_Multimeter.ViewModel
             return value;
         }
 
+        /// <summary>
+        /// Delete point from low mask series
+        /// </summary>
+        /// <param name="xValue"></param>
+        /// <returns>True if the point was deleted</returns>
         public bool DeleteFromLow(string xValue)
         {
             double x;
@@ -542,6 +698,12 @@ namespace ENGG4810_Multimeter.ViewModel
             return false;
         }
 
+        /// <summary>
+        /// Add point to High mask
+        /// </summary>
+        /// <param name="xstring">X coordinate</param>
+        /// <param name="ystring">Y coordinate</param>
+        /// <returns>True if point was added</returns>
         public bool AddToHigh(string xstring, string ystring)
         {
             double x, y;
@@ -566,9 +728,10 @@ namespace ENGG4810_Multimeter.ViewModel
                         index++;
                     }
                     SeriesCollection[2].Values.Insert(index, new ObservablePoint { X = x, Y = y });
-                    return true;
+                } else
+                {
+                    SeriesCollection[2].Values.Add(new ObservablePoint { X = x, Y = y });
                 }
-                SeriesCollection[2].Values.Add(new ObservablePoint { X = x, Y = y });
             }
             if (SeriesCollection[0].Values.Count > 0)
             {
@@ -577,7 +740,7 @@ namespace ENGG4810_Multimeter.ViewModel
                 bool isPresent = false;
                 foreach (ObservablePoint point in SeriesCollection[2].Values)
                 {
-                    if (point.X == lastDataXValue)
+                    if (point.X >= lastDataXValue)
                     {
                         isPresent = true;
                         break;
@@ -595,6 +758,11 @@ namespace ENGG4810_Multimeter.ViewModel
             return true;
         }
 
+        /// <summary>
+        /// Delete point from high mask
+        /// </summary>
+        /// <param name="xValue"></param>
+        /// <returns>True if point was deleted</returns>
         public bool DeleteFromHigh(string xValue)
         {
             double x;
@@ -612,6 +780,12 @@ namespace ENGG4810_Multimeter.ViewModel
             return false;
         }
 
+        /// <summary>
+        /// Edit currently selected high mask point
+        /// </summary>
+        /// <param name="xstring"></param>
+        /// <param name="ystring"></param>
+        /// <returns></returns>
         public bool EditHigh(string xstring, string ystring)
         {
             double x;
@@ -633,6 +807,11 @@ namespace ENGG4810_Multimeter.ViewModel
             return false;
         }
 
+        /// <summary>
+        /// Determine the action when a mask value point is clicked
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
         public string HandlePointClick(ChartPoint point)
         {
             if (SeriesCollection.IndexOf(point.SeriesView) == 1) //low
@@ -666,6 +845,9 @@ namespace ENGG4810_Multimeter.ViewModel
             SerialHandler.SendZero();
         }
 
+        /// <summary>
+        /// Test the masking of the data
+        /// </summary>
         public void TestMask()
         {
             MaskValues.ClearMasks();
@@ -729,6 +911,11 @@ namespace ENGG4810_Multimeter.ViewModel
                         MaskValues.AddToMask(start, end);
                         isStart = true;
                     }
+                }
+                if (i == SeriesCollection[0].Values.Count - 1 && !isStart)
+                {
+                    end = point.X;
+                    MaskValues.AddToMask(start, end);
                 }
             }
             MaskText = MaskValues.GetMaskText();

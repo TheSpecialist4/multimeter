@@ -8,7 +8,8 @@ namespace ENGG4810_Multimeter.Model
 {
     public class DataModel
     {
-        public string Unit { get; set; }
-        public double Value { get; set; }
+        public string X { get; set; }
+        public string Y { get; set; }
+        public string TimeStamp { get; set; }
     }
 }

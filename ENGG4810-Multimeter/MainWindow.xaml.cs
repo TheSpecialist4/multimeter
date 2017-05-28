@@ -12,7 +12,9 @@ namespace ENGG4810_Multimeter
     /// </summary>
     public partial class MainWindow : Window
     {
-
+        /// <summary>
+        /// Main view model of the class
+        /// </summary>
         public MainViewModel vm;
 
         private Color buttonGreen;
@@ -28,9 +30,22 @@ namespace ENGG4810_Multimeter
             vm = (MainViewModel)this.DataContext;
        }
 
+        /// <summary>
+        /// Handler for connected button click
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnConnected_Click(object sender, RoutedEventArgs e)
         {
-            vm.SwitchToConnected();
+            if (!vm.SwitchToConnected())
+            {
+                mainGrid.Opacity = 0.3;
+                MessageBox.Show("Couldn't connect to any port. Switching to disconnected mode");
+                SwitchToDisconnectedMode();
+                return;
+            }
+
+            columnMultimeter.Width = new GridLength(325.0);
 
             btnDisconnected.BorderBrush = new SolidColorBrush(Colors.Transparent);
             btnConnected.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9017a5"));
@@ -45,6 +60,11 @@ namespace ENGG4810_Multimeter
             //BeginStoryboard(this.FindResource("ModeLoadStoryboard") as Storyboard);
         }
 
+        /// <summary>
+        /// Handler for disconnected button click
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnDisconnected_Click(object sender, RoutedEventArgs e)
         {
             if (vm.SeriesCollection[0].Values.Count != 0)
@@ -61,9 +81,13 @@ namespace ENGG4810_Multimeter
             }
         }
 
+        /// <summary>
+        /// Change visibility and appearance of various GUI elements to switch to disconnected mode
+        /// </summary>
         private void SwitchToDisconnectedMode()
         {
             vm.SwitchToDisconnected();
+            columnMultimeter.Width = new GridLength(0.0);
             btnConnected.BorderBrush = new SolidColorBrush(Colors.Transparent);
             btnDisconnected.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9017a5"));
 
@@ -77,6 +101,11 @@ namespace ENGG4810_Multimeter
             stackPanelMasks.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// Event handler for the play button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnPlay_Click(object sender, RoutedEventArgs e)
         {
             vm.IsReading = !vm.IsReading;
@@ -86,7 +115,7 @@ namespace ENGG4810_Multimeter
 
             if (vm.IsReading && vm.IsModeConnected)
             {
-                Task.Factory.StartNew(vm.StartContinuousGraph);
+                //Task.Factory.StartNew(vm.StartContinuousGraph);
                 //vm.StartContinuousGraph();
                 return;
             }
@@ -101,6 +130,11 @@ namespace ENGG4810_Multimeter
             }
         }
 
+        /// <summary>
+        /// Event handler for Multimeter hide button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnMultimeterHide_Click(object sender, RoutedEventArgs e)
         {
             columnMultimeter.Width = new GridLength(0.0);
@@ -109,6 +143,11 @@ namespace ENGG4810_Multimeter
 
         }
 
+        /// <summary>
+        /// Event handler when current button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnCurrent_Click(object sender, RoutedEventArgs e)
         {
             vm.Unit = "A";
@@ -118,6 +157,11 @@ namespace ENGG4810_Multimeter
             changeMultiBtnBorderToGreen("C");
         }
 
+        /// <summary>
+        /// Event handler when resistance button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnResistance_Click(object sender, RoutedEventArgs e)
         {
             vm.Unit = "\x03A9";
@@ -127,6 +171,11 @@ namespace ENGG4810_Multimeter
             changeMultiBtnBorderToGreen("R");
         }
 
+        /// <summary>
+        /// event handler when voltage button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnVoltage_Click(object sender, RoutedEventArgs e)
         {
             vm.DataType = "Voltage: ";
@@ -136,38 +185,40 @@ namespace ENGG4810_Multimeter
             changeMultiBtnBorderToGreen("V");
         }
 
+        /// <summary>
+        /// Change the colour of the multimeter buttons to green
+        /// </summary>
+        /// <param name="buttonType"></param>
         private void changeMultiBtnBorderToGreen(string buttonType)
         {
-            //btnResistance.Background = new SolidColorBrush(buttonGray);
-            //btnCurrent.Background = new SolidColorBrush(buttonGray);
-            //btnVoltage.Background = new SolidColorBrush(buttonGray);
-
-            //switch (buttonType)
-            //{
-            //    case "V":
-            //        btnVoltage.Background = new SolidColorBrush(buttonGreen);
-            //        break;
-            //    case "C":
-            //        btnCurrent.Background = new SolidColorBrush(buttonGreen);
-            //        break;
-            //    case "R":
-            //        btnResistance.Background = new SolidColorBrush(buttonGreen);
-            //        break;
-            //    default:
-            //        break;
-            //}
+            
         }
 
+        /// <summary>
+        /// event handler when save button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             vm.SaveData();
         }
 
+        /// <summary>
+        /// event handler when open file button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnOpenFile_Click(object sender, RoutedEventArgs e)
         {
             vm.LoadFile();
         }
 
+        /// <summary>
+        /// event handler when reset button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnDelete_Click(object sender, RoutedEventArgs e)
         {
             if (MessageBox.Show("Are you sure?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question)
@@ -179,11 +230,26 @@ namespace ENGG4810_Multimeter
             }
         }
 
+        /// <summary>
+        /// event handler when window is loaded
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            vm.SetUpSerial();
+            if (!vm.SetUpSerial())
+            {
+                mainGrid.Opacity = 0.3;
+                MessageBox.Show("No serial connection found! Switching to disconnected mode");
+                SwitchToDisconnectedMode();
+            }
         }
 
+        /// <summary>
+        /// event handler when a point on the chart is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="chartPoint"></param>
         private void chart_DataClick(object sender, LiveCharts.ChartPoint chartPoint)
         {
             var chartType = vm.HandlePointClick(chartPoint);
@@ -210,6 +276,11 @@ namespace ENGG4810_Multimeter
             }
         }
 
+        /// <summary>
+        /// event handler when Add button is clicked for low mask series
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnLowAdd_Click(object sender, RoutedEventArgs e)
         {
             if (!vm.AddToLow(txtBoxLowX.Text, txtBoxLowY.Text))
@@ -222,6 +293,11 @@ namespace ENGG4810_Multimeter
             }
         }
 
+        /// <summary>
+        /// Event handler when edit button is clicked for low mask series
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnLowEdit_Click(object sender, RoutedEventArgs e)
         {
             vm.EditLow(txtBoxLowX.Text, txtBoxLowY.Text);
@@ -229,6 +305,11 @@ namespace ENGG4810_Multimeter
             btnLowAdd.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// Event handler when delete button is clicked for a point on low mask series
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnLowDelete_Click(object sender, RoutedEventArgs e)
         {
             if (!vm.DeleteFromLow(txtBoxLowX.Text))
@@ -241,6 +322,11 @@ namespace ENGG4810_Multimeter
             }
         }
 
+        /// <summary>
+        /// event handler when add button is clicked for high mask testing series
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnHighAdd_Click(object sender, RoutedEventArgs e)
         {
             if (!vm.AddToHigh(txtBoxHighX.Text, txtBoxHighY.Text))
@@ -253,6 +339,11 @@ namespace ENGG4810_Multimeter
             }
         }
 
+        /// <summary>
+        /// event handler when delete button is clicked for high mask testing series
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnHighDelete_Click(object sender, RoutedEventArgs e)
         {
             if (!vm.DeleteFromHigh(txtBoxHighX.Text))
@@ -265,6 +356,11 @@ namespace ENGG4810_Multimeter
             }
         }
 
+        /// <summary>
+        /// Event handler when edit button is clicked for high mask testing series
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnHighEdit_Click(object sender, RoutedEventArgs e)
         {
             vm.EditHigh(txtBoxHighX.Text, txtBoxHighY.Text);
@@ -272,6 +368,11 @@ namespace ENGG4810_Multimeter
             btnHighEdit.Visibility = Visibility.Collapsed;
         }
 
+        /// <summary>
+        /// event handler when a key is pressed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.Escape)
@@ -289,6 +390,11 @@ namespace ENGG4810_Multimeter
             vm.SendMode();
         }
 
+        /// <summary>
+        /// event handler when load mask file button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnLoadMaskFile_Click(object sender, RoutedEventArgs e)
         {
             if (!vm.LoadMaskFile())
@@ -297,11 +403,11 @@ namespace ENGG4810_Multimeter
             }
         }
 
-        private void chart_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            
-        }
-
+        /// <summary>
+        /// event handler when refresh button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnRefreshMask_Click(object sender, RoutedEventArgs e)
         {
             vm.TestMask();

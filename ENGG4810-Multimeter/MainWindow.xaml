@@ -220,9 +220,6 @@
                     Margin="10,10,10,0"
                     Click="btnDisconnected_Click" />
         </StackPanel>
-        <Grid Name="gridPortError" Grid.Row="2">
-            <TextBlock Text="Error in connecting to Port" FontSize="40" />
-        </Grid>
         <Grid x:Name="mainGrid" Grid.Row="2" RenderTransformOrigin="0.5,0.5" Background="#eeeaef">
             <Grid.RenderTransform>
                 <TransformGroup>
@@ -246,7 +243,7 @@
                     <TextBlock FontSize="34" FontWeight="Light" Foreground="#17a398"><Run Text="{Binding Value}" /><Run Text=" "/><Run Text="{Binding Unit}" /></TextBlock>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Name="txtBlockTimeStamp" Text="2015-05-01T08:00:00.0/2015-05-01T08:00:00.0"
+                    <TextBlock Name="txtBlockTimeStamp" Text="{Binding Timestamp}"
                                Margin="10,10,20,0" FontSize="14" Padding="0,10,0,0" Foreground="Gray"/>
                     <Button x:Name="btnPlay" 
                             Content="&#xE768;" 
@@ -289,7 +286,7 @@
                 <!--<Rectangle x:Name="rectangle" Height="450" Fill="#17253d" Margin="10,0" />-->
                 <lvc:CartesianChart x:Name="chart" Series="{Binding SeriesCollection}" 
                                     AnimationsSpeed="0:0:0.5" LegendLocation="Bottom" 
-                                    MinHeight="400" Zoom="X" DataClick="chart_DataClick" MouseMove="chart_MouseMove">
+                                    MinHeight="400" Zoom="X" DataClick="chart_DataClick">
                     <lvc:CartesianChart.AxisY>
                         <lvc:Axis Title="Value" LabelFormatter="{Binding YFormatter}"/>
                     </lvc:CartesianChart.AxisY>
@@ -384,9 +381,9 @@
                                 Width="75" VerticalAlignment="Top" Margin="20,10,20,0"
                                 Template="{StaticResource AllButtonsTemplate}" FontSize="14"
                                 Click="btnLoadMaskFile_Click"/>
-                        <StackPanel Margin="80,0,0,0" HorizontalAlignment="Stretch">
+                        <StackPanel Margin="80,0,0,0" HorizontalAlignment="Right">
                             <StackPanel Orientation="Horizontal">
-                                <Label Content="Fail Intervals" Margin="0,5,0,0" FontSize="18" FontWeight="Light"/>
+                                <Label Content="Fail Intervals" Margin="0,5,0,0" FontSize="20" FontWeight="Light"/>
                                 <Button Name="btnRefreshMask" Content="&#xE72C;" FontFamily="Segoe MDL2 Assets" 
                                     Template="{StaticResource MaskButtonsTemplate}"
                                     FontSize="18" Height="30" Width="30" Background="Transparent"
@@ -394,8 +391,8 @@
                                     HorizontalAlignment="Left" Click="btnRefreshMask_Click"/>
                             </StackPanel>
                             <TextBox ScrollViewer.VerticalScrollBarVisibility="Auto" Text="{Binding MaskText}" Margin="5,0,0,0" 
-                                     Height="80" BorderBrush="LightGray"
-                                     IsReadOnly="True" TextWrapping="Wrap" FontSize="14"/>
+                                     Height="100" BorderBrush="LightGray"
+                                     IsReadOnly="True" TextWrapping="Wrap" FontSize="14" MinWidth="225"/>
                         </StackPanel>
                     </StackPanel>
                     <Button Grid.Column="1"
